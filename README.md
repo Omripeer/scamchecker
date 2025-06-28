@@ -1,4 +1,4 @@
-Hebrew Phishing & Scam Website Checker
+בודק אתרים - Hebrew Phishing & Scam Website Checker
 A simple, user-friendly, and free web application designed to help users, especially older adults, check if a website is potentially a phishing or scam site. The interface is in Hebrew and built for maximum clarity and ease of use.
 ➡️ Live Demo Link (Replace this with your actual GitHub Pages URL after deploying!)
 🌟 Project Purpose
