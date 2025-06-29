@@ -19,6 +19,11 @@
              background-color: #3b82f6;
              color: white;
         }
+        /* Style for disabled button */
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -91,163 +96,111 @@
     </div>
 
     <script type="module">
+        // Import Firebase functions
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, onSnapshot, serverTimestamp, runTransaction, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, onSnapshot, serverTimestamp, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
+        // --- Configuration ---
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "your-fallback-api-key" };
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
+        // --- Initialization ---
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         
+        // --- Firebase References ---
         const searchesCollectionRef = collection(db, `artifacts/${appId}/public/data/searches`);
         const visitorCounterRef = doc(db, `artifacts/${appId}/public/data/stats/visitorCounter`);
 
+        // --- Language Dictionary ---
         const langDict = {
-            'he': {'main-title': 'בודק האתרים וההודעות הבטוח', 'subtitle': 'קיבלתם קישור או הודעה חשודה? בדקו אותם כאן.', 'website-tab': 'בדיקת אתר אינטרנט', 'sms-tab': 'בדיקת SMS / מספר טלפון', 'urlInput_placeholder': 'הדביקו כאן את כתובת האתר', 'url-check-btn': 'בדיקה', 'phoneInput_placeholder': 'הזן מספר טלפון (אופציונלי)', 'smsInput_placeholder': 'הדבק את תוכן הודעת ה-SMS כאן', 'sms-check-btn': 'בדיקת הודעה', 'loader-text': 'מבצע ניתוח ואימות...','stats-title': 'נתונים וסטטיסטיקה', 'visitors-title': 'מספר מבקרים באתר:', 'top-searches-title': '10 הכתובות הנבדקות ביותר:', 'top-searches-loading': 'טוען נתונים...', 'footer-text': '&copy; 2024 בודק אתרים. כלי חינמי שנוצר כדי לשמור על בטיחותכם ברשת.', 'report-title': 'דו"ח ניתוח', 'report-result': 'מקור הבדיקה:', 'report-confidence': 'רמת ביטחון:', 'report-category': 'קטגוריה משוערכת:', 'report-community-title': 'עזרו לקהילה, דווחו:', 'report-how-received': 'איך קיבלת את הקישור?', 'report-submit': 'שלח דיווח', 'goto-site-btn': 'מעבר לאתר (בטוח לפי גוגל)', 'error-message': 'אירעה שגיאה במהלך הבדיקה. ייתכן שיש בעיה עם ה-API או הרשת. אנא נסו שוב.'},
-            'en': {'main-title': 'The Safe Website & SMS Checker', 'subtitle': 'Got a suspicious link or message? Check it here.', 'website-tab': 'Website Check', 'sms-tab': 'SMS / Phone Number Check', 'urlInput_placeholder': 'Paste the website address here', 'url-check-btn': 'Check', 'phoneInput_placeholder': 'Enter phone number (optional)', 'smsInput_placeholder': 'Paste the SMS message content here', 'sms-check-btn': 'Check Message', 'loader-text': 'Performing analysis and verification...', 'stats-title': 'Data & Statistics', 'visitors-title': 'Website Visitors:', 'top-searches-title': 'Top 10 Checked URLs:', 'top-searches-loading': 'Loading data...', 'footer-text': '&copy; 2024 Website Checker. A free tool to keep you safe online.', 'report-title': 'Analysis Report', 'report-result': 'Check Source:', 'report-confidence': 'Confidence Level:', 'report-category': 'Estimated Category:', 'report-community-title': 'Help the community, report it:', 'report-how-received': 'How did you receive the link?', 'report-submit': 'Submit Report', 'goto-site-btn': 'Proceed to Site (Safe on Google)', 'error-message': 'An error occurred during the check. There may be an issue with the API or network. Please try again.'}
+            'he': {'main-title': 'בודק האתרים וההודעות הבטוח', 'subtitle': 'קיבלתם קישור או הודעה חשודה? בדקו אותם כאן.', 'website-tab': 'בדיקת אתר אינטרנט', 'sms-tab': 'בדיקת SMS / מספר טלפון', 'urlInput_placeholder': 'הדביקו כאן את כתובת האתר', 'url-check-btn': 'בדיקה', 'phoneInput_placeholder': 'הזן מספר טלפון (אופציונלי)', 'smsInput_placeholder': 'הדבק את תוכן הודעת ה-SMS כאן', 'sms-check-btn': 'בדיקת הודעה', 'loader-text': 'מבצע ניתוח ואימות...','stats-title': 'נתונים וסטטיסטיקה', 'visitors-title': 'מספר מבקרים באתר:', 'top-searches-title': '10 הכתובות הנבדקות ביותר:', 'top-searches-loading': 'טוען נתונים...', 'footer-text': '&copy; 2024 בודק אתרים. כלי חינמי שנוצר כדי לשמור על בטיחותכם ברשת.', 'report-title': 'דו"ח ניתוח', 'report-result': 'מקור הבדיקה:', 'report-confidence': 'רמת ביטחון:', 'report-category': 'קטגוריה משוערכת:', 'report-community-title': 'עזרו לקהילה, דווחו:', 'report-how-received': 'איך קיבלת את הקישור?', 'report-submit': 'שלח דיווח', 'goto-site-btn': 'מעבר לאתר (בטוח לפי גוגל)', 'error-message': 'אירעה שגיאה במהלך הבדיקה. אנא נסו שוב מאוחר יותר.', 'invalid-url-message': 'נא להזין כתובת אתר תקינה (למשל, example.com).'},
+            'en': {'main-title': 'The Safe Website & SMS Checker', 'subtitle': 'Got a suspicious link or message? Check it here.', 'website-tab': 'Website Check', 'sms-tab': 'SMS / Phone Number Check', 'urlInput_placeholder': 'Paste the website address here', 'url-check-btn': 'Check', 'phoneInput_placeholder': 'Enter phone number (optional)', 'smsInput_placeholder': 'Paste the SMS message content here', 'sms-check-btn': 'Check Message', 'loader-text': 'Performing analysis and verification...', 'stats-title': 'Data & Statistics', 'visitors-title': 'Website Visitors:', 'top-searches-title': 'Top 10 Checked URLs:', 'top-searches-loading': 'Loading data...', 'footer-text': '&copy; 2024 Website Checker. A free tool to keep you safe online.', 'report-title': 'Analysis Report', 'report-result': 'Check Source:', 'report-confidence': 'Confidence Level:', 'report-category': 'Estimated Category:', 'report-community-title': 'Help the community, report it:', 'report-how-received': 'How did you receive the link?', 'report-submit': 'Submit Report', 'goto-site-btn': 'Proceed to Site (Safe on Google)', 'error-message': 'An error occurred during the check. Please try again later.', 'invalid-url-message': 'Please enter a valid URL (e.g., example.com).'}
         };
+
+        // --- Core Functions ---
+        let currentLang = 'he';
 
         async function authenticateUser() { try { if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) { await signInWithCustomToken(auth, __initial_auth_token); } else { await signInAnonymously(auth); } console.log("User authenticated."); } catch (error) { console.error("Authentication failed:", error); } }
         
-        async function updateGlobalVisitorCounter() {
-            try {
-                await runTransaction(db, async (transaction) => {
-                    const counterDoc = await transaction.get(visitorCounterRef);
-                    if (!counterDoc.exists()) {
-                        transaction.set(visitorCounterRef, { count: 1 });
-                    } else {
-                        const newCount = counterDoc.data().count + 1;
-                        transaction.update(visitorCounterRef, { count: newCount });
-                    }
-                });
-            } catch (error) { console.error("Failed to update global visitor counter:", error); }
-        }
+        async function updateGlobalVisitorCounter() { try { await runTransaction(db, async (t) => { const docSnap = await t.get(visitorCounterRef); if (!docSnap.exists()) { t.set(visitorCounterRef, { count: 1 }); } else { t.update(visitorCounterRef, { count: docSnap.data().count + 1 }); } }); } catch (e) { console.error("Visitor counter transaction failed: ", e); } }
 
-        function listenForVisitorCount() {
-            const counterElement = document.getElementById('visitorCounter');
-            onSnapshot(visitorCounterRef, (doc) => {
-                if (doc.exists()) {
-                    counterElement.textContent = doc.data().count.toLocaleString();
-                } else {
-                    counterElement.textContent = '1';
-                }
-            }, (error) => {
-                console.error("Error listening to visitor counter:", error);
-                counterElement.textContent = 'N/A';
-            });
-        }
+        function listenForVisitorCount() { const el = document.getElementById('visitorCounter'); onSnapshot(visitorCounterRef, (doc) => { el.textContent = doc.exists() ? doc.data().count.toLocaleString() : '1'; }, (error) => { console.error("Visitor counter listener failed:", error); el.textContent = 'N/A'; }); }
         
-        async function incrementSearchCount(url) { 
-            if (!auth.currentUser) return; 
-            const docId = btoa(url);
-            const docRef = doc(searchesCollectionRef, docId); 
-            try { 
-                await runTransaction(db, async (t) => { 
-                    const sfDoc = await t.get(docRef); 
-                    if (!sfDoc.exists()) { 
-                        t.set(docRef, { url: url, count: 1, lastSearched: serverTimestamp() }); 
-                    } else { 
-                        t.update(docRef, { count: sfDoc.data().count + 1, lastSearched: serverTimestamp() }); 
-                    } 
-                }); 
-            } catch (e) { console.error("Transaction failed: ", e); } 
-        }
+        async function incrementSearchCount(url) { if (!auth.currentUser) return; const docId = btoa(url); const docRef = doc(searchesCollectionRef, docId); try { await runTransaction(db, async (t) => { const sfDoc = await t.get(docRef); if (!sfDoc.exists()) { t.set(docRef, { url, count: 1, lastSearched: serverTimestamp() }); } else { t.update(docRef, { count: sfDoc.data().count + 1, lastSearched: serverTimestamp() }); } }); } catch (e) { console.error("Search count transaction failed: ", e); } }
 
         function listenForTopSearches() { 
+            const listEl = document.getElementById('topSearches');
             onSnapshot(searchesCollectionRef, (snapshot) => { 
                 const searchCounts = [];
-                snapshot.forEach((doc) => {
-                    searchCounts.push(doc.data());
-                });
-
-                const sortedSearches = searchCounts.sort((a, b) => b.count - a.count).slice(0, 10);
+                snapshot.forEach((doc) => searchCounts.push(doc.data()));
+                const sorted = searchCounts.sort((a, b) => b.count - a.count).slice(0, 10);
                 
-                const list = document.getElementById('topSearches'); 
-                list.innerHTML = ''; 
-                if (sortedSearches.length === 0) { 
-                    const loadingLi = document.createElement('li');
-                    loadingLi.id = 'top-searches-loading';
-                    loadingLi.textContent = langDict[currentLang]['top-searches-loading'];
-                    list.appendChild(loadingLi);
+                listEl.innerHTML = ''; 
+                if (sorted.length === 0) { 
+                    const li = document.createElement('li');
+                    li.id = 'top-searches-loading';
+                    li.textContent = langDict[currentLang]['top-searches-loading'];
+                    listEl.appendChild(li);
                     return; 
                 } 
-                sortedSearches.forEach(s => { 
+                sorted.forEach(s => { 
                     const item = document.createElement('li'); 
                     const name = s.url.length > 35 ? s.url.substring(0, 32) + '...' : s.url; 
                     item.textContent = `${name} (${s.count.toLocaleString()})`; 
                     item.className = 'py-1'; 
-                    list.appendChild(item); 
+                    listEl.appendChild(item); 
                 }); 
             }, (error) => { 
-                console.error("Error listening for top searches:", error); 
-                document.getElementById('topSearches').innerHTML = '<li>Error loading data.</li>'; 
+                console.error("Top searches listener failed:", error); 
+                listEl.innerHTML = `<li>Error loading data.</li>`; 
             }); 
-        }
-        
-        let currentLang = 'he';
-
-        window.setLanguage = function(lang) {
-            currentLang = lang;
-            document.documentElement.lang = lang;
-            document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
-            for (const id in langDict[lang]) {
-                const element = document.getElementById(id);
-                if (element) {
-                    if (id.includes('_placeholder')) { element.placeholder = langDict[lang][id]; } 
-                    else if (element.tagName === 'BUTTON' || element.tagName === 'H1' || element.tagName === 'H2' || element.tagName === 'H3' || element.tagName === 'P' || element.tagName === 'LI') { 
-                        element.innerHTML = langDict[lang][id]; 
-                    }
-                }
-            }
-            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector(`.lang-btn.${lang}`).classList.add('active');
-        }
-
-        window.openTab = function(tabName) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
-            document.getElementById(`${tabName}-checker`).classList.remove('hidden');
-            document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`${tabName}-tab`).classList.add('active');
-            clearResults();
         }
 
         async function runCheck(type) {
             clearResults();
             const loader = document.getElementById('loader');
+            const urlButton = document.getElementById('url-check-btn');
+            const smsButton = document.getElementById('sms-check-btn');
+
             loader.classList.remove('hidden');
+            urlButton.disabled = true;
+            smsButton.disabled = true;
 
             try {
                 if (type === 'url') {
                     const url = document.getElementById('urlInput').value.trim();
-                    if (!url) {
-                        displayFinalResults({ level: 'medium', message: 'אנא הכניסו כתובת לבדיקה.', report: 'לא הוזנה כתובת.', confidence: 'N/A' });
-                        loader.classList.add('hidden');
+                    if (!url || !/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(url)) {
+                        displayFinalResults({ level: 'medium', message: langDict[currentLang]['invalid-url-message'], report: 'לא הוזנה כתובת תקינה.', confidence: 'N/A' });
                         return;
                     }
                     
                     const googleApiKey = 'AIzaSyDkl8DVlrtb2vLuWgZEGlHokuZELCwpO4Q';
-                    const searchApiKey = 'REPLACE_WITH_YOUR_GOOGLE_CUSTOM_SEARCH_API_KEY';
-                    const searchEngineId = 'e151593c8370f43ea';
 
-                    const safeBrowsingPromise = fetch(`https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${googleApiKey}`, {
-                        method: 'POST', headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ client: { clientId: `secure-hebrew-checker-${appId}`, clientVersion: '5.1.0' }, threatInfo: { threatTypes: ['MALWARE', 'SOCIAL_ENGINEERING', 'UNWANTED_SOFTWARE', 'POTENTIALLY_HARMFUL_APPLICATION'], platformTypes: ['ANY_PLATFORM'], threatEntryTypes: ['URL'], threatEntries: [{ url: url }] } })
-                    }).then(res => res.json());
-                    
-                    let searchPromise;
-                    if (searchApiKey !== 'REPLACE_WITH_YOUR_GOOGLE_CUSTOM_SEARCH_API_KEY') {
-                        const searchQuery = `"${url}" "what is this site" reviews`;
-                        searchPromise = fetch(`https://www.googleapis.com/customsearch/v1?key=${searchApiKey}&cx=${searchEngineId}&q=${encodeURIComponent(searchQuery)}`).then(res => res.json());
-                    } else {
-                        searchPromise = Promise.resolve(null);
+                    const response = await fetch(`https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${googleApiKey}`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            client: { clientId: `secure-hebrew-checker-${appId}`, clientVersion: '6.0.0' },
+                            threatInfo: {
+                                threatTypes: ['MALWARE', 'SOCIAL_ENGINEERING', 'UNWANTED_SOFTWARE', 'POTENTIALLY_HARMFUL_APPLICATION'],
+                                platformTypes: ['ANY_PLATFORM'],
+                                threatEntryTypes: ['URL'],
+                                threatEntries: [{ url }]
+                            }
+                        })
+                    });
+
+                    if (!response.ok) {
+                       const errorBody = await response.json().catch(() => ({}));
+                       console.error("Safe Browsing API Error:", errorBody);
+                       throw new Error(`API Error: ${errorBody.error?.message || response.statusText}`);
                     }
                     
-                    const [safeBrowsingResult, searchResult] = await Promise.all([safeBrowsingPromise, searchPromise]);
-
-                    processUrlResults(safeBrowsingResult, searchResult, url);
+                    const safeBrowsingResult = await response.json();
+                    processUrlResults(safeBrowsingResult, url);
                     await incrementSearchCount(url);
 
                 } else { // SMS Check
@@ -265,24 +218,16 @@
                 displayFinalResults({ level: 'high', message: langDict[currentLang]['error-message'], report: `Error details: ${error.message}`, confidence: 'N/A' });
             } finally {
                 loader.classList.add('hidden');
+                urlButton.disabled = false;
+                smsButton.disabled = false;
             }
         }
         
-        function processUrlResults(safeBrowsingResult, searchResult, url) {
-            // FIX: Add defensive check for safeBrowsingResult being null or undefined
-            if (safeBrowsingResult && safeBrowsingResult.matches && safeBrowsingResult.matches.length > 0) {
+        function processUrlResults(safeBrowsingResult, url) {
+            if (safeBrowsingResult.matches && safeBrowsingResult.matches.length > 0) {
                 const threatType = safeBrowsingResult.matches[0].threatType.replace(/_/g, ' ');
                 displayFinalResults({ level: 'high', message: 'סכנה! האתר זוהה כלא בטוח.', report: `מערכת Google Safe Browsing זיהתה את האתר כבעל סיכון מסוג: ${threatType}.`, confidence: 'גבוהה', category: 'אתר מסוכן' }, 'url', url);
                 return;
-            }
-
-            if (searchResult && searchResult.items && searchResult.items.length > 0) {
-                const snippets = searchResult.items.map(item => item.snippet.toLowerCase()).join(' ');
-                if (/\b(scam|fraud|phishing|fake|complaint|warning)\b/.test(snippets)) {
-                    displayFinalResults({ level: 'medium', message: 'סיכון בינוני - זוהו דיווחים שליליים.', report: 'נמצאו דיווחים קהילתיים המצביעים על כך שאתר זה עלול להיות לא אמין או קשור להונאה.', confidence: 'בינונית', category: 'דיווחים שליליים' }, 'url', url);
-                    return;
-                }
-                // ... other checks remain the same
             }
             
             displayFinalResults({ level: 'safe', message: 'האתר בטוח על פי גוגל.', report: 'האתר עבר בהצלחה את בדיקת הבטיחות של גוגל. לא נמצא מידע נוסף המצביע על סיכון.', confidence: 'גבוהה', category: 'כללי' }, 'url', url);
@@ -331,6 +276,7 @@
                 </form>
             `;
             reportDiv.classList.remove('hidden');
+            setLanguage(currentLang);
         }
 
         function clearResults() {
@@ -339,13 +285,36 @@
             document.getElementById('report').classList.add('hidden');
         }
         
-        window.setLanguage = setLanguage;
-        window.openTab = openTab;
+        window.setLanguage = function(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
+            for (const id in langDict[lang]) {
+                const element = document.getElementById(id);
+                if (element) {
+                    if (id.includes('_placeholder')) { element.placeholder = langDict[lang][id]; }
+                    else { element.innerHTML = langDict[lang][id]; }
+                }
+            }
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.lang-btn.${lang}`).classList.add('active');
+        }
+
+        window.openTab = function(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.getElementById(`${tabName}-checker`).classList.remove('hidden');
+            document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            clearResults();
+        }
+
+        // Expose function to global scope
         window.runCheck = runCheck;
 
+        // --- App Initialization ---
         document.addEventListener('DOMContentLoaded', async () => {
             await authenticateUser();
-            await updateGlobalVisitorCounter(); // Await this to prevent race conditions
+            await updateGlobalVisitorCounter();
             listenForVisitorCount();
             listenForTopSearches();
             setLanguage('he');
