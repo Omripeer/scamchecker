@@ -24,6 +24,21 @@
             opacity: 0.6;
             cursor: not-allowed;
         }
+        /* API Source badges */
+        .api-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 4px;
+            margin-left: 4px;
+        }
+        .api-badge.google { background-color: #4285F4; color: white; }
+        .api-badge.virustotal { background-color: #394EFF; color: white; }
+        .api-badge.phishtank { background-color: #FF6B35; color: white; }
+        .api-badge.local { background-color: #6B7280; color: white; }
+        .api-badge.ipqs { background-color: #10B981; color: white; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -99,8 +114,86 @@
     <script>
         // --- Language Dictionary ---
         const langDict = {
-            'he': {'main-title': 'בודק האתרים וההודעות הבטוח', 'subtitle': 'קיבלתם קישור או הודעה חשודה? בדקו אותם כאן.', 'website-tab': 'בדיקת אתר אינטרנט', 'sms-tab': 'בדיקת SMS / מספר טלפון', 'urlInput_placeholder': 'הדביקו כאן את כתובת האתר', 'url-check-btn': 'בדיקה', 'phoneInput_placeholder': 'הזן מספר טלפון (אופציונלי)', 'smsInput_placeholder': 'הדבק את תוכן הודעת ה-SMS כאן', 'sms-check-btn': 'בדיקת הודעה', 'loader-text': 'מבצע ניתוח ואימות...','stats-title': 'נתונים וסטטיסטיקה', 'visitors-title': 'מספר מבקרים באתר:', 'top-searches-title': '10 הכתובות הנבדקות ביותר:', 'top-searches-loading': 'טוען נתונים...', 'footer-text': '&copy; 2024 בודק אתרים. כלי חינמי שנוצר כדי לשמור על בטיחותכם ברשת.', 'report-title': 'דו"ח ניתוח', 'report-result': 'מקור הבדיקה:', 'report-confidence': 'רמת ביטחון:', 'report-category': 'קטגוריה משוערכת:', 'report-community-title': 'עזרו לקהילה, דווחו:', 'report-how-received': 'איך קיבלת את הקישור?', 'report-submit': 'שלח דיווח', 'goto-site-btn': 'מעבר לאתר (בטוח לפי גוגל)', 'error-message': 'אירעה שגיאה במהלך הבדיקה. אנא נסו שוב מאוחר יותר.', 'invalid-url-message': 'נא להזין כתובת אתר תקינה (למשל, example.com).', 'empty-sms-message': 'אנא הכניסו תוכן לבדיקה.', 'empty-sms-report': 'לא הוזן תוכן.'},
-            'en': {'main-title': 'The Safe Website & SMS Checker', 'subtitle': 'Got a suspicious link or message? Check it here.', 'website-tab': 'Website Check', 'sms-tab': 'SMS / Phone Number Check', 'urlInput_placeholder': 'Paste the website address here', 'url-check-btn': 'Check', 'phoneInput_placeholder': 'Enter phone number (optional)', 'smsInput_placeholder': 'Paste the SMS message content here', 'sms-check-btn': 'Check Message', 'loader-text': 'Performing analysis and verification...', 'stats-title': 'Data & Statistics', 'visitors-title': 'Website Visitors:', 'top-searches-title': 'Top 10 Checked URLs:', 'top-searches-loading': 'Loading data...', 'footer-text': '&copy; 2024 Website Checker. A free tool to keep you safe online.', 'report-title': 'Analysis Report', 'report-result': 'Check Source:', 'report-confidence': 'Confidence Level:', 'report-category': 'Estimated Category:', 'report-community-title': 'Help the community, report it:', 'report-how-received': 'How did you receive the link?', 'report-submit': 'Submit Report', 'goto-site-btn': 'Proceed to Site (Safe on Google)', 'error-message': 'An error occurred during the check. Please try again later.', 'invalid-url-message': 'Please enter a valid URL (e.g., example.com).', 'empty-sms-message': 'Please enter content to check.', 'empty-sms-report': 'No content entered.'}
+            'he': {
+                'main-title': 'בודק האתרים וההודעות הבטוח', 
+                'subtitle': 'קיבלתם קישור או הודעה חשודה? בדקו אותם כאן.', 
+                'website-tab': 'בדיקת אתר אינטרנט', 
+                'sms-tab': 'בדיקת SMS / מספר טלפון', 
+                'urlInput_placeholder': 'הדביקו כאן את כתובת האתר', 
+                'url-check-btn': 'בדיקה', 
+                'phoneInput_placeholder': 'הזן מספר טלפון לבדיקה', 
+                'smsInput_placeholder': 'הדבק את תוכן הודעת ה-SMS כאן (אופציונלי)', 
+                'sms-check-btn': 'בדיקת הודעה / טלפון', 
+                'loader-text': 'מבצע ניתוח מקיף של מספר מקורות...',
+                'stats-title': 'נתונים וסטטיסטיקה', 
+                'visitors-title': 'מספר מבקרים באתר:', 
+                'top-searches-title': '10 הכתובות הנבדקות ביותר:', 
+                'top-searches-loading': 'טוען נתונים...', 
+                'footer-text': '&copy; 2024 בודק אתרים. כלי חינמי שנוצר כדי לשמור על בטיחותכם ברשת.', 
+                'report-title': 'דו"ח ניתוח', 
+                'report-result': 'מקור הבדיקה:', 
+                'report-confidence': 'רמת ביטחון:', 
+                'report-category': 'קטגוריה משוערכת:', 
+                'report-sources': 'מקורות שנבדקו:',
+                'report-community-title': 'עזרו לקהילה, דווחו:', 
+                'report-how-received': 'איך קיבלת את הקישור?', 
+                'report-submit': 'שלח דיווח', 
+                'goto-site-btn': 'מעבר לאתר (נמצא בטוח)', 
+                'error-message': 'אירעה שגיאה במהלך הבדיקה. אנא נסו שוב מאוחר יותר.', 
+                'invalid-url-message': 'נא להזין כתובת אתר תקינה (למשל, example.com).', 
+                'empty-sms-message': 'אנא הכניסו מספר טלפון או תוכן הודעה לבדיקה.', 
+                'empty-sms-report': 'לא הוזן תוכן.',
+                'phone-spam-detected': 'מספר הטלפון זוהה כחשוד לספאם!',
+                'phone-safe': 'מספר הטלפון נראה תקין.',
+                'phone-unknown': 'לא נמצא מידע על מספר זה.',
+                'url-dangerous': 'סכנה! האתר זוהה כלא בטוח.',
+                'url-suspicious': 'חשוד! נמצאו סימנים מחשידים באתר.',
+                'url-safe': 'האתר נמצא בטוח.',
+                'checking-google': 'בודק ב-Google Safe Browsing...',
+                'checking-phishtank': 'בודק ב-PhishTank...',
+                'checking-patterns': 'מנתח דפוסים חשודים...',
+                'checking-phone': 'בודק מספר טלפון...'
+            },
+            'en': {
+                'main-title': 'The Safe Website & SMS Checker', 
+                'subtitle': 'Got a suspicious link or message? Check it here.', 
+                'website-tab': 'Website Check', 
+                'sms-tab': 'SMS / Phone Number Check', 
+                'urlInput_placeholder': 'Paste the website address here', 
+                'url-check-btn': 'Check', 
+                'phoneInput_placeholder': 'Enter phone number to check', 
+                'smsInput_placeholder': 'Paste the SMS message content here (optional)', 
+                'sms-check-btn': 'Check Message / Phone', 
+                'loader-text': 'Performing comprehensive multi-source analysis...', 
+                'stats-title': 'Data & Statistics', 
+                'visitors-title': 'Website Visitors:', 
+                'top-searches-title': 'Top 10 Checked URLs:', 
+                'top-searches-loading': 'Loading data...', 
+                'footer-text': '&copy; 2024 Website Checker. A free tool to keep you safe online.', 
+                'report-title': 'Analysis Report', 
+                'report-result': 'Check Source:', 
+                'report-confidence': 'Confidence Level:', 
+                'report-category': 'Estimated Category:', 
+                'report-sources': 'Sources Checked:',
+                'report-community-title': 'Help the community, report it:', 
+                'report-how-received': 'How did you receive the link?', 
+                'report-submit': 'Submit Report', 
+                'goto-site-btn': 'Proceed to Site (Found Safe)', 
+                'error-message': 'An error occurred during the check. Please try again later.', 
+                'invalid-url-message': 'Please enter a valid URL (e.g., example.com).', 
+                'empty-sms-message': 'Please enter a phone number or message content to check.', 
+                'empty-sms-report': 'No content entered.',
+                'phone-spam-detected': 'Phone number detected as suspected spam!',
+                'phone-safe': 'Phone number appears legitimate.',
+                'phone-unknown': 'No information found for this number.',
+                'url-dangerous': 'Danger! This website has been identified as unsafe.',
+                'url-suspicious': 'Suspicious! Warning signs detected on this website.',
+                'url-safe': 'Website found to be safe.',
+                'checking-google': 'Checking Google Safe Browsing...',
+                'checking-phishtank': 'Checking PhishTank...',
+                'checking-patterns': 'Analyzing suspicious patterns...',
+                'checking-phone': 'Checking phone number...'
+            }
         };
 
         // --- Core State ---
@@ -113,6 +206,485 @@
         let firebaseDb = null;
         let searchesCollectionRef = null;
         let visitorCounterRef = null;
+
+        // ===================================================================
+        // PHONE NUMBER SPAM/SCAM DETECTION
+        // ===================================================================
+        
+        // Known spam phone number patterns (Israeli and international)
+        const spamPhonePatterns = {
+            // Israeli spam patterns - premium numbers, known scam prefixes
+            israeliSpam: [
+                /^1-?900/,      // Premium rate numbers
+                /^1-?901/,      // Premium rate numbers
+                /^1-?902/,      // Premium rate numbers
+                /^\*[0-9]{4}/,  // Short codes starting with *
+                /^0(72|73|76|77|78|79)/, // VoIP ranges often used for spam
+            ],
+            // International premium/spam patterns
+            internationalSpam: [
+                /^\+?1-?900/,   // US Premium
+                /^\+?44-?9/,    // UK Premium  
+                /^\+?1-?876/,   // Jamaica - common scam origin
+                /^\+?234/,      // Nigeria - common scam origin
+                /^\+?233/,      // Ghana - common scam origin
+                /^\+?355/,      // Albania - common scam origin
+                /^\+?381/,      // Serbia - common scam origin
+            ],
+            // Suspicious patterns
+            suspicious: [
+                /^(\d)\1{6,}/,  // Same digit repeated 7+ times
+                /1234567/,      // Sequential numbers
+                /7654321/,      // Reverse sequential
+            ]
+        };
+
+        // Known spam numbers database (community-reported, commonly reported in Israel)
+        const knownSpamNumbers = new Set([
+            // Example commonly reported spam numbers - this list should be expanded
+            '0722222222', '0733333333', '0799999999',
+            '1-900-999-9999', '1-800-SCAM',
+        ]);
+
+        /**
+         * Check phone number against local spam patterns and database
+         * @param {string} phone - Phone number to check
+         * @returns {object} - Result with level, message, and details
+         */
+        function checkPhoneLocal(phone) {
+            // Normalize phone number
+            const normalizedPhone = phone.replace(/[\s\-\(\)\.]/g, '');
+            
+            // Check known spam numbers
+            if (knownSpamNumbers.has(normalizedPhone)) {
+                return {
+                    isSpam: true,
+                    confidence: 'high',
+                    reason: currentLang === 'he' ? 'מספר זה מופיע במאגר הספאם הידוע' : 'This number is in the known spam database',
+                    source: 'Local Database'
+                };
+            }
+            
+            // Check Israeli spam patterns
+            for (const pattern of spamPhonePatterns.israeliSpam) {
+                if (pattern.test(normalizedPhone)) {
+                    return {
+                        isSpam: true,
+                        confidence: 'high',
+                        reason: currentLang === 'he' ? 'מספר פרימיום או VoIP חשוד' : 'Premium or suspicious VoIP number',
+                        source: 'Pattern Analysis'
+                    };
+                }
+            }
+            
+            // Check international spam patterns
+            for (const pattern of spamPhonePatterns.internationalSpam) {
+                if (pattern.test(normalizedPhone)) {
+                    return {
+                        isSpam: true,
+                        confidence: 'medium',
+                        reason: currentLang === 'he' ? 'מספר ממדינה עם שכיחות גבוהה של הונאות' : 'Number from country with high fraud rate',
+                        source: 'Pattern Analysis'
+                    };
+                }
+            }
+            
+            // Check suspicious patterns
+            for (const pattern of spamPhonePatterns.suspicious) {
+                if (pattern.test(normalizedPhone)) {
+                    return {
+                        isSpam: true,
+                        confidence: 'low',
+                        reason: currentLang === 'he' ? 'מספר עם דפוס חשוד' : 'Number with suspicious pattern',
+                        source: 'Pattern Analysis'
+                    };
+                }
+            }
+            
+            return {
+                isSpam: false,
+                confidence: 'medium',
+                reason: currentLang === 'he' ? 'לא נמצאו דפוסי ספאם ידועים' : 'No known spam patterns found',
+                source: 'Pattern Analysis'
+            };
+        }
+
+        /**
+         * Check phone using IPQualityScore API (free tier: 5000/month)
+         * This is optional - requires API key configuration
+         * API Documentation: https://www.ipqualityscore.com/documentation/phone-number-validation-api/overview
+         */
+        async function checkPhoneIPQS(phone, apiKey) {
+            if (!apiKey) return null;
+            
+            try {
+                const encodedPhone = encodeURIComponent(phone);
+                const response = await fetch(`https://www.ipqualityscore.com/api/json/phone/${apiKey}/${encodedPhone}?country[]=IL&country[]=US`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+                
+                if (!response.ok) return null;
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    return {
+                        isSpam: data.fraud_score > 75 || data.recent_abuse || data.VOIP,
+                        confidence: data.fraud_score > 85 ? 'high' : (data.fraud_score > 50 ? 'medium' : 'low'),
+                        reason: data.fraud_score > 75 ? 
+                            (currentLang === 'he' ? `ציון סיכון גבוה: ${data.fraud_score}/100` : `High risk score: ${data.fraud_score}/100`) :
+                            (currentLang === 'he' ? `ציון סיכון: ${data.fraud_score}/100` : `Risk score: ${data.fraud_score}/100`),
+                        source: 'IPQualityScore API',
+                        details: {
+                            fraudScore: data.fraud_score,
+                            valid: data.valid,
+                            carrier: data.carrier,
+                            lineType: data.line_type,
+                            voip: data.VOIP,
+                            recentAbuse: data.recent_abuse
+                        }
+                    };
+                }
+            } catch (error) {
+                console.error('IPQS API Error:', error);
+            }
+            return null;
+        }
+
+        /**
+         * Combined phone number spam check
+         */
+        async function checkPhoneSpam(phone) {
+            const results = {
+                sources: [],
+                isSpam: false,
+                confidence: 'low',
+                details: []
+            };
+            
+            // Local pattern check (always runs)
+            const localResult = checkPhoneLocal(phone);
+            results.sources.push({ name: 'Local', badge: 'local' });
+            results.details.push(localResult);
+            
+            if (localResult.isSpam) {
+                results.isSpam = true;
+                results.confidence = localResult.confidence;
+            }
+            
+            // IPQS API check (optional - runs if key is configured)
+            // Users can set their own API key here for enhanced detection
+            const ipqsApiKey = window.IPQS_API_KEY || null;
+            if (ipqsApiKey) {
+                const ipqsResult = await checkPhoneIPQS(phone, ipqsApiKey);
+                if (ipqsResult) {
+                    results.sources.push({ name: 'IPQS', badge: 'ipqs' });
+                    results.details.push(ipqsResult);
+                    
+                    if (ipqsResult.isSpam && !results.isSpam) {
+                        results.isSpam = true;
+                        results.confidence = ipqsResult.confidence;
+                    } else if (ipqsResult.isSpam && results.isSpam) {
+                        results.confidence = 'high'; // Both sources agree
+                    }
+                }
+            }
+            
+            return results;
+        }
+
+        // ===================================================================
+        // URL/WEBSITE SPAM/SCAM DETECTION  
+        // ===================================================================
+
+        // Suspicious URL patterns for phishing/scam detection
+        const suspiciousUrlPatterns = {
+            // Typosquatting of popular domains
+            typosquatting: [
+                /paypa[l1].*\.(?!com)/i,
+                /g[o0]{2}g[l1]e/i,
+                /fac[e3]b[o0]{2}k/i,
+                /amaz[o0]n/i,
+                /app[l1]e.*(?!\.com)/i,
+                /micr[o0]s[o0]ft/i,
+                /bank.*login/i,
+                /login.*bank/i,
+            ],
+            // Suspicious TLDs often used in scams
+            suspiciousTlds: [
+                /\.(tk|ml|ga|cf|gq|xyz|top|work|click|link|vip|loan|win|racing)$/i,
+            ],
+            // Suspicious patterns in URL
+            suspiciousPatterns: [
+                /[.-]secure[.-]/i,
+                /[.-]login[.-]/i,
+                /[.-]verify[.-]/i,
+                /[.-]update[.-]/i,
+                /[.-]account[.-]/i,
+                /[.-]confirm[.-]/i,
+                /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/, // IP address URLs
+                /@.*@/,  // Multiple @ symbols
+                /[.-]\.com/,  // Suspicious subdomain pattern
+            ],
+            // Hebrew-specific phishing patterns
+            hebrewScamPatterns: [
+                /bit\.ly/i,
+                /tinyurl/i,
+                /t\.co/i,
+                // Israeli bank impersonation patterns
+                /leumi.*login/i,
+                /poalim.*login/i,
+                /discount.*bank/i,
+                /mizrahi.*tefahot/i,
+            ]
+        };
+
+        // Known safe domains (whitelist)
+        const knownSafeDomains = new Set([
+            'google.com', 'google.co.il', 'facebook.com', 'youtube.com',
+            'microsoft.com', 'apple.com', 'amazon.com', 'amazon.co.il',
+            'bankleumi.co.il', 'poalim.co.il', 'mizrahi-tefahot.co.il',
+            'gov.il', 'police.gov.il', 'btl.gov.il'
+        ]);
+
+        /**
+         * Extract domain from URL
+         */
+        function extractDomain(url) {
+            try {
+                let processedUrl = url.trim().toLowerCase();
+                if (!processedUrl.startsWith('http://') && !processedUrl.startsWith('https://')) {
+                    processedUrl = 'https://' + processedUrl;
+                }
+                const urlObj = new URL(processedUrl);
+                return urlObj.hostname.replace(/^www\./, '');
+            } catch {
+                return url.replace(/^(https?:\/\/)?(www\.)?/, '').split('/')[0];
+            }
+        }
+
+        /**
+         * Check URL against local suspicious patterns
+         */
+        function checkUrlLocal(url) {
+            const domain = extractDomain(url);
+            const warnings = [];
+            let riskLevel = 0;
+            
+            // Check if domain is in whitelist
+            if (knownSafeDomains.has(domain)) {
+                return {
+                    isSuspicious: false,
+                    confidence: 'high',
+                    reason: currentLang === 'he' ? 'דומיין ידוע ובטוח' : 'Known safe domain',
+                    source: 'Local Whitelist',
+                    warnings: []
+                };
+            }
+            
+            // Check typosquatting
+            for (const pattern of suspiciousUrlPatterns.typosquatting) {
+                if (pattern.test(url)) {
+                    warnings.push(currentLang === 'he' ? 'חשד להתחזות לאתר ידוע' : 'Suspected impersonation of known site');
+                    riskLevel += 3;
+                }
+            }
+            
+            // Check suspicious TLDs
+            for (const pattern of suspiciousUrlPatterns.suspiciousTlds) {
+                if (pattern.test(domain)) {
+                    warnings.push(currentLang === 'he' ? 'סיומת דומיין חשודה' : 'Suspicious domain extension');
+                    riskLevel += 2;
+                }
+            }
+            
+            // Check suspicious patterns
+            for (const pattern of suspiciousUrlPatterns.suspiciousPatterns) {
+                if (pattern.test(url)) {
+                    warnings.push(currentLang === 'he' ? 'דפוס URL חשוד' : 'Suspicious URL pattern');
+                    riskLevel += 1;
+                }
+            }
+            
+            // Check Hebrew scam patterns
+            for (const pattern of suspiciousUrlPatterns.hebrewScamPatterns) {
+                if (pattern.test(url)) {
+                    warnings.push(currentLang === 'he' ? 'קישור מקוצר או דפוס הונאה ידוע' : 'Shortened link or known scam pattern');
+                    riskLevel += 2;
+                }
+            }
+            
+            // URL length check (very long URLs are often phishing)
+            if (url.length > 100) {
+                warnings.push(currentLang === 'he' ? 'כתובת ארוכה באופן חשוד' : 'Suspiciously long URL');
+                riskLevel += 1;
+            }
+            
+            // Multiple subdomains check
+            const subdomainCount = (domain.match(/\./g) || []).length;
+            if (subdomainCount > 3) {
+                warnings.push(currentLang === 'he' ? 'מספר רב של תת-דומיינים' : 'Excessive subdomains');
+                riskLevel += 2;
+            }
+            
+            return {
+                isSuspicious: riskLevel > 0,
+                confidence: riskLevel >= 4 ? 'high' : (riskLevel >= 2 ? 'medium' : 'low'),
+                reason: warnings.length > 0 ? warnings.join('; ') : (currentLang === 'he' ? 'לא נמצאו דפוסים חשודים' : 'No suspicious patterns found'),
+                source: 'Pattern Analysis',
+                warnings: warnings,
+                riskScore: riskLevel
+            };
+        }
+
+        /**
+         * Check URL using Google Safe Browsing API
+         */
+        async function checkUrlGoogleSafeBrowsing(url) {
+            const googleApiKey = 'AIzaSyDkl8DVlrtb2vLuWgZEGlHokuZELCwpO4Q';
+            
+            try {
+                const response = await fetch(`https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${googleApiKey}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        client: { clientId: `secure-hebrew-checker-${appId}`, clientVersion: '6.0.0' },
+                        threatInfo: {
+                            threatTypes: ['MALWARE', 'SOCIAL_ENGINEERING', 'UNWANTED_SOFTWARE', 'POTENTIALLY_HARMFUL_APPLICATION'],
+                            platformTypes: ['ANY_PLATFORM'],
+                            threatEntryTypes: ['URL'],
+                            threatEntries: [{ url }]
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    console.error("Safe Browsing API Error:", await response.text());
+                    return null;
+                }
+                
+                const data = await response.json();
+                
+                if (data.matches && data.matches.length > 0) {
+                    const threatType = data.matches[0].threatType.replace(/_/g, ' ');
+                    return {
+                        isMalicious: true,
+                        confidence: 'high',
+                        reason: currentLang === 'he' ? `סוג איום: ${threatType}` : `Threat type: ${threatType}`,
+                        source: 'Google Safe Browsing',
+                        threatType: threatType
+                    };
+                }
+                
+                return {
+                    isMalicious: false,
+                    confidence: 'high',
+                    reason: currentLang === 'he' ? 'לא נמצאו איומים' : 'No threats found',
+                    source: 'Google Safe Browsing'
+                };
+            } catch (error) {
+                console.error('Google Safe Browsing Error:', error);
+                return null;
+            }
+        }
+
+        /**
+         * Check URL using PhishTank API (free, no key required for lookups)
+         * Note: PhishTank is community-driven and focuses specifically on phishing
+         * API: https://www.phishtank.com/api_info.php
+         */
+        async function checkUrlPhishTank(url) {
+            // PhishTank requires base64 encoding of URL and form submission
+            // For client-side, we use their checkurl API
+            try {
+                const formData = new FormData();
+                formData.append('url', url);
+                formData.append('format', 'json');
+                
+                // Note: PhishTank API may have CORS restrictions
+                // This is a best-effort check
+                const response = await fetch('https://checkurl.phishtank.com/checkurl/', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) return null;
+                
+                const data = await response.json();
+                
+                return {
+                    isPhishing: data.results?.in_database && data.results?.valid,
+                    confidence: data.results?.verified ? 'high' : 'medium',
+                    reason: data.results?.in_database ? 
+                        (currentLang === 'he' ? 'נמצא במאגר הפישינג' : 'Found in phishing database') :
+                        (currentLang === 'he' ? 'לא נמצא במאגר' : 'Not found in database'),
+                    source: 'PhishTank',
+                    phishtankUrl: data.results?.phish_detail_page
+                };
+            } catch (error) {
+                // PhishTank API may fail due to CORS - this is expected
+                console.log('PhishTank check skipped (CORS):', error.message);
+                return null;
+            }
+        }
+
+        /**
+         * Combined URL spam/scam check
+         */
+        async function checkUrlSpam(url) {
+            const results = {
+                sources: [],
+                isDangerous: false,
+                isSuspicious: false,
+                confidence: 'low',
+                details: []
+            };
+            
+            // Update loader text
+            const loaderText = document.getElementById('loader-text');
+            
+            // Local pattern check (always runs first)
+            if (loaderText) loaderText.textContent = langDict[currentLang]['checking-patterns'];
+            const localResult = checkUrlLocal(url);
+            results.sources.push({ name: 'Local', badge: 'local' });
+            results.details.push(localResult);
+            
+            if (localResult.isSuspicious) {
+                results.isSuspicious = true;
+                if (localResult.confidence === 'high') {
+                    results.confidence = 'medium';
+                }
+            }
+            
+            // Google Safe Browsing check
+            if (loaderText) loaderText.textContent = langDict[currentLang]['checking-google'];
+            const googleResult = await checkUrlGoogleSafeBrowsing(url);
+            if (googleResult) {
+                results.sources.push({ name: 'Google', badge: 'google' });
+                results.details.push(googleResult);
+                
+                if (googleResult.isMalicious) {
+                    results.isDangerous = true;
+                    results.confidence = 'high';
+                }
+            }
+            
+            // PhishTank check (may fail due to CORS but worth trying)
+            if (loaderText) loaderText.textContent = langDict[currentLang]['checking-phishtank'];
+            const phishTankResult = await checkUrlPhishTank(url);
+            if (phishTankResult) {
+                results.sources.push({ name: 'PhishTank', badge: 'phishtank' });
+                results.details.push(phishTankResult);
+                
+                if (phishTankResult.isPhishing) {
+                    results.isDangerous = true;
+                    results.confidence = 'high';
+                }
+            }
+            
+            return results;
+        }
 
         // --- Core UI Functions ---
         function setLanguage(lang) {
@@ -168,12 +740,38 @@
                 resultsDiv.appendChild(button);
             }
             
+            // Generate sources badges HTML
+            let sourcesHtml = '';
+            if (result.sources && result.sources.length > 0) {
+                sourcesHtml = `<div class="mb-4"><strong>${langDict[currentLang]['report-sources']}</strong> `;
+                result.sources.forEach(src => {
+                    sourcesHtml += `<span class="api-badge ${src.badge}">${src.name}</span>`;
+                });
+                sourcesHtml += '</div>';
+            }
+            
             let categoryHtml = result.category ? `<div class="mb-2"><strong>${langDict[currentLang]['report-category']}</strong> ${result.category}</div>` : '';
+            
+            // Generate detailed findings HTML
+            let detailsHtml = '';
+            if (result.details && result.details.length > 0) {
+                detailsHtml = '<div class="mt-4 space-y-2">';
+                result.details.forEach(detail => {
+                    const icon = detail.isSpam || detail.isMalicious || detail.isPhishing || detail.isSuspicious ? '⚠️' : '✅';
+                    detailsHtml += `<div class="p-2 bg-white rounded border text-sm">
+                        <span class="font-semibold">${icon} ${detail.source}:</span> ${detail.reason}
+                    </div>`;
+                });
+                detailsHtml += '</div>';
+            }
+            
             reportDiv.innerHTML = `
                 <h3 class="text-xl font-bold mb-4">${langDict[currentLang]['report-title']}</h3>
+                ${sourcesHtml}
                 <div class="mb-2"><strong>${langDict[currentLang]['report-result']}</strong> ${result.report}</div>
                 <div class="mb-4"><strong>${langDict[currentLang]['report-confidence']}</strong> ${result.confidence}</div>
                 ${categoryHtml}
+                ${detailsHtml}
                 <hr class="my-4">
                 <h4 class="text-lg font-bold mb-2">${langDict[currentLang]['report-community-title']}</h4>
                 <form id="community-report-form">
@@ -195,31 +793,45 @@
             setLanguage(currentLang);
         }
 
-        function processSms(inputText) {
+        function processSms(inputText, phone) {
+            // Enhanced SMS checking with more keywords
             const lowercasedInput = inputText.toLowerCase();
-            const keywords = ["זכית", "פרס", "חשבונך ייסגר", "דחוף", "אימות פרטים", "לעדכון לחץ כאן", "winner", "prize", "urgent", "verify"];
+            const keywords = [
+                // Hebrew scam keywords
+                "זכית", "פרס", "חשבונך ייסגר", "דחוף", "אימות פרטים", "לעדכון לחץ כאן",
+                "חסימת חשבון", "אשר עכשיו", "פעולה נדרשת", "משלוח ממתין", "חבילה ממתינה",
+                "אימות זהות", "עדכן פרטים", "כרטיס אשראי", "סיסמה", "קוד אימות",
+                // English scam keywords  
+                "winner", "prize", "urgent", "verify", "confirm", "suspended",
+                "lottery", "inheritance", "million", "password", "click here",
+                "act now", "limited time", "free gift"
+            ];
             const foundKeywords = keywords.filter(k => lowercasedInput.includes(k));
 
             if (foundKeywords.length > 0) {
-                 displayFinalResults({ level: 'medium', message: 'סיכון בינוני - נמצאו מילים חשודות.', report: `ההודעה מכילה את הביטויים: "${foundKeywords.join(', ')}", הנפוצים בהודעות הונאה.`, confidence: 'בינונית' });
-            } else {
-                displayFinalResults({ level: 'safe', message: 'ההודעה נראית תקינה.', report: 'לא נמצאו מילות מפתח חשודות בהודעה.', confidence: 'גבוהה' });
-            }
-        }
-
-        function processUrlResults(safeBrowsingResult, url) {
-            if (safeBrowsingResult.matches && safeBrowsingResult.matches.length > 0) {
-                const threatType = safeBrowsingResult.matches[0].threatType.replace(/_/g, ' ');
-                displayFinalResults({ level: 'high', message: 'סכנה! האתר זוהה כלא בטוח.', report: `מערכת Google Safe Browsing זיהתה את האתר כבעל סיכון מסוג: ${threatType}.`, confidence: 'גבוהה', category: 'אתר מסוכן' }, 'url', url);
-                return;
+                return {
+                    isSpam: true,
+                    confidence: foundKeywords.length >= 3 ? 'high' : 'medium',
+                    reason: currentLang === 'he' 
+                        ? `נמצאו ביטויים חשודים: "${foundKeywords.slice(0, 3).join(', ')}"` 
+                        : `Suspicious phrases found: "${foundKeywords.slice(0, 3).join(', ')}"`,
+                    source: 'Keyword Analysis',
+                    keywords: foundKeywords
+                };
             }
             
-            displayFinalResults({ level: 'safe', message: 'האתר בטוח על פי גוגל.', report: 'האתר עבר בהצלחה את בדיקת הבטיחות של גוגל. לא נמצא מידע נוסף המצביע על סיכון.', confidence: 'גבוהה', category: 'כללי' }, 'url', url);
+            return {
+                isSpam: false,
+                confidence: 'medium',
+                reason: currentLang === 'he' ? 'לא נמצאו מילות מפתח חשודות' : 'No suspicious keywords found',
+                source: 'Keyword Analysis'
+            };
         }
 
         async function runCheck(type) {
             clearResults();
             const loader = document.getElementById('loader');
+            const loaderText = document.getElementById('loader-text');
             const urlButton = document.getElementById('url-check-btn');
             const smsButton = document.getElementById('sms-check-btn');
 
@@ -231,55 +843,153 @@
                 if (type === 'url') {
                     const url = document.getElementById('urlInput').value.trim();
                     if (!url || !/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(url)) {
-                        displayFinalResults({ level: 'medium', message: langDict[currentLang]['invalid-url-message'], report: 'לא הוזנה כתובת תקינה.', confidence: 'N/A' });
+                        displayFinalResults({ 
+                            level: 'medium', 
+                            message: langDict[currentLang]['invalid-url-message'], 
+                            report: currentLang === 'he' ? 'לא הוזנה כתובת תקינה.' : 'Invalid URL entered.',
+                            confidence: 'N/A',
+                            sources: [],
+                            details: []
+                        });
                         return;
                     }
                     
-                    const googleApiKey = 'AIzaSyDkl8DVlrtb2vLuWgZEGlHokuZELCwpO4Q';
-
-                    const response = await fetch(`https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${googleApiKey}`, {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({
-                            client: { clientId: `secure-hebrew-checker-${appId}`, clientVersion: '6.0.0' },
-                            threatInfo: {
-                                threatTypes: ['MALWARE', 'SOCIAL_ENGINEERING', 'UNWANTED_SOFTWARE', 'POTENTIALLY_HARMFUL_APPLICATION'],
-                                platformTypes: ['ANY_PLATFORM'],
-                                threatEntryTypes: ['URL'],
-                                threatEntries: [{ url }]
-                            }
-                        })
-                    });
-
-                    if (!response.ok) {
-                       const errorBody = await response.json().catch(() => ({}));
-                       console.error("Safe Browsing API Error:", errorBody);
-                       throw new Error(`API Error: ${errorBody.error?.message || response.statusText}`);
+                    // Use comprehensive URL checking
+                    const urlCheckResult = await checkUrlSpam(url);
+                    
+                    // Determine result level and message
+                    let level, message, category;
+                    if (urlCheckResult.isDangerous) {
+                        level = 'high';
+                        message = langDict[currentLang]['url-dangerous'];
+                        category = currentLang === 'he' ? 'אתר מסוכן' : 'Dangerous Site';
+                    } else if (urlCheckResult.isSuspicious && urlCheckResult.confidence !== 'low') {
+                        level = 'medium';
+                        message = langDict[currentLang]['url-suspicious'];
+                        category = currentLang === 'he' ? 'אתר חשוד' : 'Suspicious Site';
+                    } else {
+                        level = 'safe';
+                        message = langDict[currentLang]['url-safe'];
+                        category = currentLang === 'he' ? 'אתר תקין' : 'Safe Site';
                     }
                     
-                    const safeBrowsingResult = await response.json();
-                    processUrlResults(safeBrowsingResult, url);
+                    // Build report message
+                    const reportMessages = urlCheckResult.details
+                        .filter(d => d.reason)
+                        .map(d => d.reason);
+                    
+                    displayFinalResults({
+                        level: level,
+                        message: message,
+                        report: reportMessages.join(' | ') || (currentLang === 'he' ? 'הבדיקה הושלמה.' : 'Check completed.'),
+                        confidence: urlCheckResult.confidence === 'high' 
+                            ? (currentLang === 'he' ? 'גבוהה' : 'High')
+                            : urlCheckResult.confidence === 'medium'
+                                ? (currentLang === 'he' ? 'בינונית' : 'Medium')
+                                : (currentLang === 'he' ? 'נמוכה' : 'Low'),
+                        category: category,
+                        sources: urlCheckResult.sources,
+                        details: urlCheckResult.details
+                    }, 'url', url);
                     
                     // Increment search count if Firebase is available
                     if (typeof incrementSearchCount === 'function') {
                         await incrementSearchCount(url);
                     }
 
-                } else { // SMS Check
+                } else { // SMS/Phone Check
                     const phone = document.getElementById('phoneInput').value.trim();
                     const sms = document.getElementById('smsInput').value.trim();
                     
                     if (!phone && !sms) {
-                         displayFinalResults({ level: 'medium', message: langDict[currentLang]['empty-sms-message'], report: langDict[currentLang]['empty-sms-report'], confidence: 'N/A' });
-                         return;
+                        displayFinalResults({ 
+                            level: 'medium', 
+                            message: langDict[currentLang]['empty-sms-message'], 
+                            report: langDict[currentLang]['empty-sms-report'], 
+                            confidence: 'N/A',
+                            sources: [],
+                            details: []
+                        });
+                        return;
                     }
                     
-                    const inputText = `${phone} ${sms}`;
-                    processSms(inputText);
+                    const results = {
+                        sources: [],
+                        isSpam: false,
+                        confidence: 'low',
+                        details: []
+                    };
+                    
+                    // Check phone number if provided
+                    if (phone) {
+                        if (loaderText) loaderText.textContent = langDict[currentLang]['checking-phone'];
+                        const phoneResult = await checkPhoneSpam(phone);
+                        results.sources.push(...phoneResult.sources);
+                        results.details.push(...phoneResult.details);
+                        
+                        if (phoneResult.isSpam) {
+                            results.isSpam = true;
+                            results.confidence = phoneResult.confidence;
+                        }
+                    }
+                    
+                    // Check SMS content if provided
+                    if (sms) {
+                        if (loaderText) loaderText.textContent = langDict[currentLang]['checking-patterns'];
+                        const smsResult = processSms(sms, phone);
+                        results.sources.push({ name: 'Keywords', badge: 'local' });
+                        results.details.push(smsResult);
+                        
+                        if (smsResult.isSpam) {
+                            results.isSpam = true;
+                            if (smsResult.confidence === 'high' || results.confidence !== 'high') {
+                                results.confidence = smsResult.confidence;
+                            }
+                        }
+                    }
+                    
+                    // Determine result level and message
+                    let level, message;
+                    if (results.isSpam && results.confidence === 'high') {
+                        level = 'high';
+                        message = langDict[currentLang]['phone-spam-detected'];
+                    } else if (results.isSpam) {
+                        level = 'medium';
+                        message = currentLang === 'he' ? 'נמצאו סימנים חשודים - יש להיזהר!' : 'Suspicious signs found - be careful!';
+                    } else {
+                        level = 'safe';
+                        message = phone ? langDict[currentLang]['phone-safe'] : 
+                            (currentLang === 'he' ? 'ההודעה נראית תקינה.' : 'Message appears legitimate.');
+                    }
+                    
+                    // Build report message
+                    const reportMessages = results.details
+                        .filter(d => d.reason)
+                        .map(d => d.reason);
+                    
+                    displayFinalResults({
+                        level: level,
+                        message: message,
+                        report: reportMessages.join(' | ') || (currentLang === 'he' ? 'הבדיקה הושלמה.' : 'Check completed.'),
+                        confidence: results.confidence === 'high' 
+                            ? (currentLang === 'he' ? 'גבוהה' : 'High')
+                            : results.confidence === 'medium'
+                                ? (currentLang === 'he' ? 'בינונית' : 'Medium')
+                                : (currentLang === 'he' ? 'נמוכה' : 'Low'),
+                        sources: results.sources,
+                        details: results.details
+                    }, 'phone', phone);
                 }
             } catch(error) {
                 console.error("A critical error occurred in runCheck:", error);
-                displayFinalResults({ level: 'high', message: langDict[currentLang]['error-message'], report: `Error details: ${error.message}`, confidence: 'N/A' });
+                displayFinalResults({ 
+                    level: 'high', 
+                    message: langDict[currentLang]['error-message'], 
+                    report: `Error details: ${error.message}`, 
+                    confidence: 'N/A',
+                    sources: [],
+                    details: []
+                });
             } finally {
                 loader.classList.add('hidden');
                 urlButton.disabled = false;
