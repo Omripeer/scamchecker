@@ -31,8 +31,8 @@
     <div class="container mx-auto p-4 sm:p-6 md:p-8 max-w-3xl">
         
         <div id="lang-switcher" class="flex justify-end mb-4">
-            <button onclick="setLanguage('he')" class="lang-btn he p-2 px-4 rounded-r-lg border border-gray-300 active">עברית</button>
-            <button onclick="setLanguage('en')" class="lang-btn en p-2 px-4 rounded-l-lg border border-gray-300">English</button>
+            <button id="lang-he-btn" class="lang-btn he p-2 px-4 rounded-r-lg border border-gray-300 active">עברית</button>
+            <button id="lang-en-btn" class="lang-btn en p-2 px-4 rounded-l-lg border border-gray-300">English</button>
         </div>
 
         <header class="text-center mb-8">
@@ -43,10 +43,10 @@
         <main class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
             
             <div class="flex border-b border-gray-200 mb-6">
-                <button id="website-tab" onclick="openTab('website')" class="tab flex-1 p-4 font-bold text-lg text-gray-500 border-b-4 border-transparent active">
+                <button id="website-tab" class="tab flex-1 p-4 font-bold text-lg text-gray-500 border-b-4 border-transparent active">
                     בדיקת אתר אינטרנט
                 </button>
-                <button id="sms-tab" onclick="openTab('sms')" class="tab flex-1 p-4 font-bold text-lg text-gray-500 border-b-4 border-transparent">
+                <button id="sms-tab" class="tab flex-1 p-4 font-bold text-lg text-gray-500 border-b-4 border-transparent">
                     בדיקת SMS / מספר טלפון
                 </button>
             </div>
@@ -54,7 +54,7 @@
             <div id="website-checker" class="tab-content">
                 <div class="flex flex-col items-center">
                     <input type="url" id="urlInput" placeholder="הדביקו כאן את כתובת האתר (לדוגמה: example.com)" class="w-full text-center text-lg p-4 border-2 border-gray-300 rounded-xl mb-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                    <button id="url-check-btn" onclick="runCheck('url')" class="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white font-bold text-xl py-4 px-10 rounded-xl shadow-md">בדיקה</button>
+                    <button id="url-check-btn" class="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white font-bold text-xl py-4 px-10 rounded-xl shadow-md">בדיקה</button>
                 </div>
             </div>
             
@@ -62,7 +62,7 @@
                  <div class="flex flex-col items-center">
                     <input type="tel" id="phoneInput" placeholder="הזן מספר טלפון (אופציונלי)" class="w-full text-center text-lg p-4 border-2 border-gray-300 rounded-xl mb-4">
                     <textarea id="smsInput" placeholder="הדבק את תוכן הודעת ה-SMS כאן" class="w-full text-center text-lg p-4 border-2 border-gray-300 rounded-xl mb-4" rows="4"></textarea>
-                    <button id="sms-check-btn" onclick="runCheck('sms')" class="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white font-bold text-xl py-4 px-10 rounded-xl shadow-md">בדיקת הודעה</button>
+                    <button id="sms-check-btn" class="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white font-bold text-xl py-4 px-10 rounded-xl shadow-md">בדיקת הודעה</button>
                 </div>
             </div>
 
@@ -95,68 +95,126 @@
         </footer>
     </div>
 
-    <script type="module">
-        // Import Firebase functions
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, onSnapshot, serverTimestamp, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        
-        // --- Configuration ---
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "your-fallback-api-key" };
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-        // --- Initialization ---
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        
-        // --- Firebase References ---
-        const searchesCollectionRef = collection(db, `artifacts/${appId}/public/data/searches`);
-        const visitorCounterRef = doc(db, `artifacts/${appId}/public/data/stats/visitorCounter`);
-
+    <!-- Core UI Script (non-module, loads immediately) -->
+    <script>
         // --- Language Dictionary ---
         const langDict = {
-            'he': {'main-title': 'בודק האתרים וההודעות הבטוח', 'subtitle': 'קיבלתם קישור או הודעה חשודה? בדקו אותם כאן.', 'website-tab': 'בדיקת אתר אינטרנט', 'sms-tab': 'בדיקת SMS / מספר טלפון', 'urlInput_placeholder': 'הדביקו כאן את כתובת האתר', 'url-check-btn': 'בדיקה', 'phoneInput_placeholder': 'הזן מספר טלפון (אופציונלי)', 'smsInput_placeholder': 'הדבק את תוכן הודעת ה-SMS כאן', 'sms-check-btn': 'בדיקת הודעה', 'loader-text': 'מבצע ניתוח ואימות...','stats-title': 'נתונים וסטטיסטיקה', 'visitors-title': 'מספר מבקרים באתר:', 'top-searches-title': '10 הכתובות הנבדקות ביותר:', 'top-searches-loading': 'טוען נתונים...', 'footer-text': '&copy; 2024 בודק אתרים. כלי חינמי שנוצר כדי לשמור על בטיחותכם ברשת.', 'report-title': 'דו"ח ניתוח', 'report-result': 'מקור הבדיקה:', 'report-confidence': 'רמת ביטחון:', 'report-category': 'קטגוריה משוערכת:', 'report-community-title': 'עזרו לקהילה, דווחו:', 'report-how-received': 'איך קיבלת את הקישור?', 'report-submit': 'שלח דיווח', 'goto-site-btn': 'מעבר לאתר (בטוח לפי גוגל)', 'error-message': 'אירעה שגיאה במהלך הבדיקה. אנא נסו שוב מאוחר יותר.', 'invalid-url-message': 'נא להזין כתובת אתר תקינה (למשל, example.com).'},
-            'en': {'main-title': 'The Safe Website & SMS Checker', 'subtitle': 'Got a suspicious link or message? Check it here.', 'website-tab': 'Website Check', 'sms-tab': 'SMS / Phone Number Check', 'urlInput_placeholder': 'Paste the website address here', 'url-check-btn': 'Check', 'phoneInput_placeholder': 'Enter phone number (optional)', 'smsInput_placeholder': 'Paste the SMS message content here', 'sms-check-btn': 'Check Message', 'loader-text': 'Performing analysis and verification...', 'stats-title': 'Data & Statistics', 'visitors-title': 'Website Visitors:', 'top-searches-title': 'Top 10 Checked URLs:', 'top-searches-loading': 'Loading data...', 'footer-text': '&copy; 2024 Website Checker. A free tool to keep you safe online.', 'report-title': 'Analysis Report', 'report-result': 'Check Source:', 'report-confidence': 'Confidence Level:', 'report-category': 'Estimated Category:', 'report-community-title': 'Help the community, report it:', 'report-how-received': 'How did you receive the link?', 'report-submit': 'Submit Report', 'goto-site-btn': 'Proceed to Site (Safe on Google)', 'error-message': 'An error occurred during the check. Please try again later.', 'invalid-url-message': 'Please enter a valid URL (e.g., example.com).'}
+            'he': {'main-title': 'בודק האתרים וההודעות הבטוח', 'subtitle': 'קיבלתם קישור או הודעה חשודה? בדקו אותם כאן.', 'website-tab': 'בדיקת אתר אינטרנט', 'sms-tab': 'בדיקת SMS / מספר טלפון', 'urlInput_placeholder': 'הדביקו כאן את כתובת האתר', 'url-check-btn': 'בדיקה', 'phoneInput_placeholder': 'הזן מספר טלפון (אופציונלי)', 'smsInput_placeholder': 'הדבק את תוכן הודעת ה-SMS כאן', 'sms-check-btn': 'בדיקת הודעה', 'loader-text': 'מבצע ניתוח ואימות...','stats-title': 'נתונים וסטטיסטיקה', 'visitors-title': 'מספר מבקרים באתר:', 'top-searches-title': '10 הכתובות הנבדקות ביותר:', 'top-searches-loading': 'טוען נתונים...', 'footer-text': '&copy; 2024 בודק אתרים. כלי חינמי שנוצר כדי לשמור על בטיחותכם ברשת.', 'report-title': 'דו"ח ניתוח', 'report-result': 'מקור הבדיקה:', 'report-confidence': 'רמת ביטחון:', 'report-category': 'קטגוריה משוערכת:', 'report-community-title': 'עזרו לקהילה, דווחו:', 'report-how-received': 'איך קיבלת את הקישור?', 'report-submit': 'שלח דיווח', 'goto-site-btn': 'מעבר לאתר (בטוח לפי גוגל)', 'error-message': 'אירעה שגיאה במהלך הבדיקה. אנא נסו שוב מאוחר יותר.', 'invalid-url-message': 'נא להזין כתובת אתר תקינה (למשל, example.com).', 'empty-sms-message': 'אנא הכניסו תוכן לבדיקה.', 'empty-sms-report': 'לא הוזן תוכן.'},
+            'en': {'main-title': 'The Safe Website & SMS Checker', 'subtitle': 'Got a suspicious link or message? Check it here.', 'website-tab': 'Website Check', 'sms-tab': 'SMS / Phone Number Check', 'urlInput_placeholder': 'Paste the website address here', 'url-check-btn': 'Check', 'phoneInput_placeholder': 'Enter phone number (optional)', 'smsInput_placeholder': 'Paste the SMS message content here', 'sms-check-btn': 'Check Message', 'loader-text': 'Performing analysis and verification...', 'stats-title': 'Data & Statistics', 'visitors-title': 'Website Visitors:', 'top-searches-title': 'Top 10 Checked URLs:', 'top-searches-loading': 'Loading data...', 'footer-text': '&copy; 2024 Website Checker. A free tool to keep you safe online.', 'report-title': 'Analysis Report', 'report-result': 'Check Source:', 'report-confidence': 'Confidence Level:', 'report-category': 'Estimated Category:', 'report-community-title': 'Help the community, report it:', 'report-how-received': 'How did you receive the link?', 'report-submit': 'Submit Report', 'goto-site-btn': 'Proceed to Site (Safe on Google)', 'error-message': 'An error occurred during the check. Please try again later.', 'invalid-url-message': 'Please enter a valid URL (e.g., example.com).', 'empty-sms-message': 'Please enter content to check.', 'empty-sms-report': 'No content entered.'}
         };
 
-        // --- Core Functions ---
+        // --- Core State ---
         let currentLang = 'he';
-
-        async function authenticateUser() { try { if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) { await signInWithCustomToken(auth, __initial_auth_token); } else { await signInAnonymously(auth); } console.log("User authenticated."); } catch (error) { console.error("Authentication failed:", error); } }
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         
-        async function updateGlobalVisitorCounter() { try { await runTransaction(db, async (t) => { const docSnap = await t.get(visitorCounterRef); if (!docSnap.exists()) { t.set(visitorCounterRef, { count: 1 }); } else { t.update(visitorCounterRef, { count: docSnap.data().count + 1 }); } }); } catch (e) { console.error("Visitor counter transaction failed: ", e); } }
+        // Firebase references (will be set when Firebase loads)
+        let firebaseApp = null;
+        let firebaseAuth = null;
+        let firebaseDb = null;
+        let searchesCollectionRef = null;
+        let visitorCounterRef = null;
 
-        function listenForVisitorCount() { const el = document.getElementById('visitorCounter'); onSnapshot(visitorCounterRef, (doc) => { el.textContent = doc.exists() ? doc.data().count.toLocaleString() : '1'; }, (error) => { console.error("Visitor counter listener failed:", error); el.textContent = 'N/A'; }); }
-        
-        async function incrementSearchCount(url) { if (!auth.currentUser) return; const docId = btoa(url); const docRef = doc(searchesCollectionRef, docId); try { await runTransaction(db, async (t) => { const sfDoc = await t.get(docRef); if (!sfDoc.exists()) { t.set(docRef, { url, count: 1, lastSearched: serverTimestamp() }); } else { t.update(docRef, { count: sfDoc.data().count + 1, lastSearched: serverTimestamp() }); } }); } catch (e) { console.error("Search count transaction failed: ", e); } }
+        // --- Core UI Functions ---
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
+            for (const id in langDict[lang]) {
+                const element = document.getElementById(id);
+                if (element) {
+                    if (id.includes('_placeholder')) { element.placeholder = langDict[lang][id]; }
+                    else { element.innerHTML = langDict[lang][id]; }
+                }
+            }
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            const langBtn = document.querySelector(`.lang-btn.${lang}`);
+            if (langBtn) langBtn.classList.add('active');
+        }
 
-        function listenForTopSearches() { 
-            const listEl = document.getElementById('topSearches');
-            onSnapshot(searchesCollectionRef, (snapshot) => { 
-                const searchCounts = [];
-                snapshot.forEach((doc) => searchCounts.push(doc.data()));
-                const sorted = searchCounts.sort((a, b) => b.count - a.count).slice(0, 10);
-                
-                listEl.innerHTML = ''; 
-                if (sorted.length === 0) { 
-                    const li = document.createElement('li');
-                    li.id = 'top-searches-loading';
-                    li.textContent = langDict[currentLang]['top-searches-loading'];
-                    listEl.appendChild(li);
-                    return; 
-                } 
-                sorted.forEach(s => { 
-                    const item = document.createElement('li'); 
-                    const name = s.url.length > 35 ? s.url.substring(0, 32) + '...' : s.url; 
-                    item.textContent = `${name} (${s.count.toLocaleString()})`; 
-                    item.className = 'py-1'; 
-                    listEl.appendChild(item); 
-                }); 
-            }, (error) => { 
-                console.error("Top searches listener failed:", error); 
-                listEl.innerHTML = `<li>Error loading data.</li>`; 
-            }); 
+        function openTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            const tabContent = document.getElementById(`${tabName}-checker`);
+            if (tabContent) tabContent.classList.remove('hidden');
+            document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
+            const tabBtn = document.getElementById(`${tabName}-tab`);
+            if (tabBtn) tabBtn.classList.add('active');
+            clearResults();
+        }
+
+        function clearResults() {
+            const resultsEl = document.getElementById('results');
+            const reportEl = document.getElementById('report');
+            if (resultsEl) {
+                resultsEl.innerHTML = '';
+                resultsEl.className = 'text-center mt-6 p-4 rounded-lg text-xl font-bold';
+            }
+            if (reportEl) reportEl.classList.add('hidden');
+        }
+
+        function displayFinalResults(result, type, url) {
+            const resultsDiv = document.getElementById('results');
+            const reportDiv = document.getElementById('report');
+            const colors = { high: 'bg-red-100 text-red-700', medium: 'bg-yellow-100 text-yellow-700', low: 'bg-blue-100 text-blue-700', safe: 'bg-green-100 text-green-700' };
+            resultsDiv.className = `text-center mt-6 p-4 rounded-lg text-xl font-bold ${colors[result.level]}`;
+            resultsDiv.innerHTML = `<p>${result.message}</p>`;
+
+            if ((result.level === 'safe' || result.level === 'low') && type === 'url' && url) {
+                const button = document.createElement('a');
+                button.href = url.startsWith('http') ? url : `https://${url}`;
+                button.textContent = langDict[currentLang]['goto-site-btn'];
+                button.target = '_blank';
+                button.rel = 'noopener noreferrer';
+                button.className = 'block w-max mx-auto mt-4 bg-blue-600 text-white font-bold text-lg py-2 px-6 rounded-lg hover:bg-blue-700';
+                resultsDiv.appendChild(button);
+            }
+            
+            let categoryHtml = result.category ? `<div class="mb-2"><strong>${langDict[currentLang]['report-category']}</strong> ${result.category}</div>` : '';
+            reportDiv.innerHTML = `
+                <h3 class="text-xl font-bold mb-4">${langDict[currentLang]['report-title']}</h3>
+                <div class="mb-2"><strong>${langDict[currentLang]['report-result']}</strong> ${result.report}</div>
+                <div class="mb-4"><strong>${langDict[currentLang]['report-confidence']}</strong> ${result.confidence}</div>
+                ${categoryHtml}
+                <hr class="my-4">
+                <h4 class="text-lg font-bold mb-2">${langDict[currentLang]['report-community-title']}</h4>
+                <form id="community-report-form">
+                     <select class="w-full p-2 border rounded-lg mb-2"><option>${langDict[currentLang]['report-how-received']}</option><option>SMS</option><option>Email</option><option>WhatsApp</option></select>
+                    <button type="submit" class="w-full bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700">${langDict[currentLang]['report-submit']}</button>
+                </form>
+            `;
+            reportDiv.classList.remove('hidden');
+            
+            // Add event listener for the community report form
+            const form = document.getElementById('community-report-form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    this.innerHTML = '<p class="text-green-600">תודה!</p>';
+                });
+            }
+            
+            setLanguage(currentLang);
+        }
+
+        function processSms(inputText) {
+            const lowercasedInput = inputText.toLowerCase();
+            const keywords = ["זכית", "פרס", "חשבונך ייסגר", "דחוף", "אימות פרטים", "לעדכון לחץ כאן", "winner", "prize", "urgent", "verify"];
+            const foundKeywords = keywords.filter(k => lowercasedInput.includes(k));
+
+            if (foundKeywords.length > 0) {
+                 displayFinalResults({ level: 'medium', message: 'סיכון בינוני - נמצאו מילים חשודות.', report: `ההודעה מכילה את הביטויים: "${foundKeywords.join(', ')}", הנפוצים בהודעות הונאה.`, confidence: 'בינונית' });
+            } else {
+                displayFinalResults({ level: 'safe', message: 'ההודעה נראית תקינה.', report: 'לא נמצאו מילות מפתח חשודות בהודעה.', confidence: 'גבוהה' });
+            }
+        }
+
+        function processUrlResults(safeBrowsingResult, url) {
+            if (safeBrowsingResult.matches && safeBrowsingResult.matches.length > 0) {
+                const threatType = safeBrowsingResult.matches[0].threatType.replace(/_/g, ' ');
+                displayFinalResults({ level: 'high', message: 'סכנה! האתר זוהה כלא בטוח.', report: `מערכת Google Safe Browsing זיהתה את האתר כבעל סיכון מסוג: ${threatType}.`, confidence: 'גבוהה', category: 'אתר מסוכן' }, 'url', url);
+                return;
+            }
+            
+            displayFinalResults({ level: 'safe', message: 'האתר בטוח על פי גוגל.', report: 'האתר עבר בהצלחה את בדיקת הבטיחות של גוגל. לא נמצא מידע נוסף המצביע על סיכון.', confidence: 'גבוהה', category: 'כללי' }, 'url', url);
         }
 
         async function runCheck(type) {
@@ -201,16 +259,22 @@
                     
                     const safeBrowsingResult = await response.json();
                     processUrlResults(safeBrowsingResult, url);
-                    await incrementSearchCount(url);
+                    
+                    // Increment search count if Firebase is available
+                    if (typeof incrementSearchCount === 'function') {
+                        await incrementSearchCount(url);
+                    }
 
                 } else { // SMS Check
                     const phone = document.getElementById('phoneInput').value.trim();
                     const sms = document.getElementById('smsInput').value.trim();
-                    const inputText = `${phone} ${sms}`;
-                    if (!inputText.trim()) {
-                         displayFinalResults({ level: 'medium', message: 'אנא הכניסו תוכן לבדיקה.', report: 'לא הוזן תוכן.', confidence: 'N/A' });
+                    
+                    if (!phone && !sms) {
+                         displayFinalResults({ level: 'medium', message: langDict[currentLang]['empty-sms-message'], report: langDict[currentLang]['empty-sms-report'], confidence: 'N/A' });
                          return;
                     }
+                    
+                    const inputText = `${phone} ${sms}`;
                     processSms(inputText);
                 }
             } catch(error) {
@@ -222,103 +286,139 @@
                 smsButton.disabled = false;
             }
         }
+
+        // --- Initialize Core UI on DOM Ready ---
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up event listeners for buttons
+            document.getElementById('website-tab').addEventListener('click', function() { openTab('website'); });
+            document.getElementById('sms-tab').addEventListener('click', function() { openTab('sms'); });
+            document.getElementById('url-check-btn').addEventListener('click', function() { runCheck('url'); });
+            document.getElementById('sms-check-btn').addEventListener('click', function() { runCheck('sms'); });
+            document.getElementById('lang-he-btn').addEventListener('click', function() { setLanguage('he'); });
+            document.getElementById('lang-en-btn').addEventListener('click', function() { setLanguage('en'); });
+            
+            // Set initial language
+            setLanguage('he');
+        });
+    </script>
+
+    <!-- Firebase Module Script (loads asynchronously, enhances functionality) -->
+    <script type="module">
+        // Import Firebase functions
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, onSnapshot, serverTimestamp, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
-        function processUrlResults(safeBrowsingResult, url) {
-            if (safeBrowsingResult.matches && safeBrowsingResult.matches.length > 0) {
-                const threatType = safeBrowsingResult.matches[0].threatType.replace(/_/g, ' ');
-                displayFinalResults({ level: 'high', message: 'סכנה! האתר זוהה כלא בטוח.', report: `מערכת Google Safe Browsing זיהתה את האתר כבעל סיכון מסוג: ${threatType}.`, confidence: 'גבוהה', category: 'אתר מסוכן' }, 'url', url);
-                return;
+        // --- Configuration ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "your-fallback-api-key" };
+
+        try {
+            // --- Initialization ---
+            firebaseApp = initializeApp(firebaseConfig);
+            firebaseAuth = getAuth(firebaseApp);
+            firebaseDb = getFirestore(firebaseApp);
+            
+            // --- Firebase References ---
+            searchesCollectionRef = collection(firebaseDb, `artifacts/${appId}/public/data/searches`);
+            visitorCounterRef = doc(firebaseDb, `artifacts/${appId}/public/data/stats/visitorCounter`);
+
+            // --- Firebase Functions ---
+            async function authenticateUser() { 
+                try { 
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) { 
+                        await signInWithCustomToken(firebaseAuth, __initial_auth_token); 
+                    } else { 
+                        await signInAnonymously(firebaseAuth); 
+                    } 
+                    console.log("User authenticated."); 
+                } catch (error) { 
+                    console.error("Authentication failed:", error); 
+                } 
             }
             
-            displayFinalResults({ level: 'safe', message: 'האתר בטוח על פי גוגל.', report: 'האתר עבר בהצלחה את בדיקת הבטיחות של גוגל. לא נמצא מידע נוסף המצביע על סיכון.', confidence: 'גבוהה', category: 'כללי' }, 'url', url);
-        }
-        
-        function processSms(inputText) {
-            const lowercasedInput = inputText.toLowerCase();
-            const keywords = ["זכית", "פרס", "חשבונך ייסגר", "דחוף", "אימות פרטים", "לעדכון לחץ כאן", "winner", "prize", "urgent", "verify"];
-            const foundKeywords = keywords.filter(k => lowercasedInput.includes(k));
-
-            if (foundKeywords.length > 0) {
-                 displayFinalResults({ level: 'medium', message: 'סיכון בינוני - נמצאו מילים חשודות.', report: `ההודעה מכילה את הביטויים: "${foundKeywords.join(', ')}", הנפוצים בהודעות הונאה.`, confidence: 'בינונית' });
-            } else {
-                displayFinalResults({ level: 'safe', message: 'ההודעה נראית תקינה.', report: 'לא נמצאו מילות מפתח חשודות בהודעה.', confidence: 'גבוהה' });
+            async function updateGlobalVisitorCounter() { 
+                try { 
+                    await runTransaction(firebaseDb, async (t) => { 
+                        const docSnap = await t.get(visitorCounterRef); 
+                        if (!docSnap.exists()) { 
+                            t.set(visitorCounterRef, { count: 1 }); 
+                        } else { 
+                            t.update(visitorCounterRef, { count: docSnap.data().count + 1 }); 
+                        } 
+                    }); 
+                } catch (e) { 
+                    console.error("Visitor counter transaction failed: ", e); 
+                } 
             }
-        }
 
-        function displayFinalResults(result, type, url) {
-            const resultsDiv = document.getElementById('results');
-            const reportDiv = document.getElementById('report');
-            const colors = { high: 'bg-red-100 text-red-700', medium: 'bg-yellow-100 text-yellow-700', low: 'bg-blue-100 text-blue-700', safe: 'bg-green-100 text-green-700' };
-            resultsDiv.className = `text-center mt-6 p-4 rounded-lg text-xl font-bold ${colors[result.level]}`;
-            resultsDiv.innerHTML = `<p>${result.message}</p>`;
-
-            if ((result.level === 'safe' || result.level === 'low') && type === 'url' && url) {
-                const button = document.createElement('a');
-                button.href = url.startsWith('http') ? url : `https://${url}`;
-                button.textContent = langDict[currentLang]['goto-site-btn'];
-                button.target = '_blank';
-                button.rel = 'noopener noreferrer';
-                button.className = 'block w-max mx-auto mt-4 bg-blue-600 text-white font-bold text-lg py-2 px-6 rounded-lg hover:bg-blue-700';
-                resultsDiv.appendChild(button);
+            function listenForVisitorCount() { 
+                const el = document.getElementById('visitorCounter'); 
+                onSnapshot(visitorCounterRef, (doc) => { 
+                    el.textContent = doc.exists() ? doc.data().count.toLocaleString() : '1'; 
+                }, (error) => { 
+                    console.error("Visitor counter listener failed:", error); 
+                    el.textContent = 'N/A'; 
+                }); 
             }
             
-            let categoryHtml = result.category ? `<div class="mb-2"><strong>${langDict[currentLang]['report-category']}</strong> ${result.category}</div>` : '';
-            reportDiv.innerHTML = `
-                <h3 class="text-xl font-bold mb-4">${langDict[currentLang]['report-title']}</h3>
-                <div class="mb-2"><strong>${langDict[currentLang]['report-result']}</strong> ${result.report}</div>
-                <div class="mb-4"><strong>${langDict[currentLang]['report-confidence']}</strong> ${result.confidence}</div>
-                ${categoryHtml}
-                <hr class="my-4">
-                <h4 class="text-lg font-bold mb-2">${langDict[currentLang]['report-community-title']}</h4>
-                <form onsubmit="event.preventDefault(); this.innerHTML='<p class=text-green-600>תודה!</p>';">
-                     <select class="w-full p-2 border rounded-lg mb-2"><option>${langDict[currentLang]['report-how-received']}</option><option>SMS</option><option>Email</option><option>WhatsApp</option></select>
-                    <button type="submit" class="w-full bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700">${langDict[currentLang]['report-submit']}</button>
-                </form>
-            `;
-            reportDiv.classList.remove('hidden');
-            setLanguage(currentLang);
-        }
+            // Expose incrementSearchCount to global scope
+            window.incrementSearchCount = async function(url) { 
+                if (!firebaseAuth.currentUser) return; 
+                const docId = btoa(url); 
+                const docRef = doc(searchesCollectionRef, docId); 
+                try { 
+                    await runTransaction(firebaseDb, async (t) => { 
+                        const sfDoc = await t.get(docRef); 
+                        if (!sfDoc.exists()) { 
+                            t.set(docRef, { url, count: 1, lastSearched: serverTimestamp() }); 
+                        } else { 
+                            t.update(docRef, { count: sfDoc.data().count + 1, lastSearched: serverTimestamp() }); 
+                        } 
+                    }); 
+                } catch (e) { 
+                    console.error("Search count transaction failed: ", e); 
+                } 
+            };
 
-        function clearResults() {
-            document.getElementById('results').innerHTML = '';
-            document.getElementById('results').className = 'text-center mt-6 p-4 rounded-lg text-xl font-bold';
-            document.getElementById('report').classList.add('hidden');
-        }
-        
-        window.setLanguage = function(lang) {
-            currentLang = lang;
-            document.documentElement.lang = lang;
-            document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
-            for (const id in langDict[lang]) {
-                const element = document.getElementById(id);
-                if (element) {
-                    if (id.includes('_placeholder')) { element.placeholder = langDict[lang][id]; }
-                    else { element.innerHTML = langDict[lang][id]; }
-                }
+            function listenForTopSearches() { 
+                const listEl = document.getElementById('topSearches');
+                onSnapshot(searchesCollectionRef, (snapshot) => { 
+                    const searchCounts = [];
+                    snapshot.forEach((doc) => searchCounts.push(doc.data()));
+                    const sorted = searchCounts.sort((a, b) => b.count - a.count).slice(0, 10);
+                    
+                    listEl.innerHTML = ''; 
+                    if (sorted.length === 0) { 
+                        const li = document.createElement('li');
+                        li.id = 'top-searches-loading';
+                        li.textContent = langDict[currentLang]['top-searches-loading'];
+                        listEl.appendChild(li);
+                        return; 
+                    } 
+                    sorted.forEach(s => { 
+                        const item = document.createElement('li'); 
+                        const name = s.url.length > 35 ? s.url.substring(0, 32) + '...' : s.url; 
+                        item.textContent = `${name} (${s.count.toLocaleString()})`; 
+                        item.className = 'py-1'; 
+                        listEl.appendChild(item); 
+                    }); 
+                }, (error) => { 
+                    console.error("Top searches listener failed:", error); 
+                    listEl.innerHTML = `<li>Error loading data.</li>`; 
+                }); 
             }
-            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector(`.lang-btn.${lang}`).classList.add('active');
-        }
 
-        window.openTab = function(tabName) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
-            document.getElementById(`${tabName}-checker`).classList.remove('hidden');
-            document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`${tabName}-tab`).classList.add('active');
-            clearResults();
-        }
-
-        // Expose function to global scope
-        window.runCheck = runCheck;
-
-        // --- App Initialization ---
-        document.addEventListener('DOMContentLoaded', async () => {
+            // --- Firebase Initialization ---
             await authenticateUser();
             await updateGlobalVisitorCounter();
             listenForVisitorCount();
             listenForTopSearches();
-            setLanguage('he');
-        });
+            
+            console.log("Firebase initialized successfully.");
+        } catch (error) {
+            console.error("Firebase initialization failed:", error);
+            // Firebase features will be unavailable, but core functionality still works
+        }
     </script>
 </body>
 </html>
