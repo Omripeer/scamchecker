@@ -39,6 +39,7 @@
         .api-badge.phishtank { background-color: #FF6B35; color: white; }
         .api-badge.local { background-color: #6B7280; color: white; }
         .api-badge.ipqs { background-color: #10B981; color: white; }
+        .api-badge.numverify { background-color: #8B5CF6; color: white; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -64,6 +65,9 @@
                 <button id="sms-tab" class="tab flex-1 p-4 font-bold text-lg text-gray-500 border-b-4 border-transparent">
                     בדיקת SMS / מספר טלפון
                 </button>
+                <button id="whois-tab" class="tab flex-1 p-4 font-bold text-lg text-gray-500 border-b-4 border-transparent">
+                    מי זה? (חיפוש מספר)
+                </button>
             </div>
 
             <div id="website-checker" class="tab-content">
@@ -78,6 +82,14 @@
                     <input type="tel" id="phoneInput" placeholder="הזן מספר טלפון (אופציונלי)" class="w-full text-center text-lg p-4 border-2 border-gray-300 rounded-xl mb-4">
                     <textarea id="smsInput" placeholder="הדבק את תוכן הודעת ה-SMS כאן" class="w-full text-center text-lg p-4 border-2 border-gray-300 rounded-xl mb-4" rows="4"></textarea>
                     <button id="sms-check-btn" class="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white font-bold text-xl py-4 px-10 rounded-xl shadow-md">בדיקת הודעה</button>
+                </div>
+            </div>
+
+            <div id="whois-checker" class="tab-content hidden">
+                 <div class="flex flex-col items-center">
+                    <p id="whois-description" class="text-gray-600 mb-4 text-center">הזן מספר טלפון כדי לברר למי הוא שייך ומאיזה ספק</p>
+                    <input type="tel" id="whoisPhoneInput" placeholder="הזן מספר טלפון לחיפוש (לדוגמה: 0501234567)" class="w-full text-center text-lg p-4 border-2 border-gray-300 rounded-xl mb-4">
+                    <button id="whois-check-btn" class="w-full sm:w-auto bg-purple-500 hover:bg-purple-600 text-white font-bold text-xl py-4 px-10 rounded-xl shadow-md">מי זה?</button>
                 </div>
             </div>
 
@@ -106,7 +118,7 @@
                     </div>
                 </div>
             </div>
-            <p id="footer-text" class="text-sm">&copy; 2024 בודק אתרים. כלי חינמי שנוצר כדי לשמור על בטיחותכם ברשת.</p>
+            <p id="footer-text" class="text-sm">&copy; 2025 בודק אתרים. כלי חינמי שנוצר כדי לשמור על בטיחותכם ברשת. | גרסה 1.0.1</p>
         </footer>
     </div>
 
@@ -119,17 +131,21 @@
                 'subtitle': 'קיבלתם קישור או הודעה חשודה? בדקו אותם כאן.', 
                 'website-tab': 'בדיקת אתר אינטרנט', 
                 'sms-tab': 'בדיקת SMS / מספר טלפון', 
+                'whois-tab': 'מי זה? (חיפוש מספר)',
                 'urlInput_placeholder': 'הדביקו כאן את כתובת האתר', 
                 'url-check-btn': 'בדיקה', 
                 'phoneInput_placeholder': 'הזן מספר טלפון לבדיקה', 
                 'smsInput_placeholder': 'הדבק את תוכן הודעת ה-SMS כאן (אופציונלי)', 
                 'sms-check-btn': 'בדיקת הודעה / טלפון', 
+                'whois-description': 'הזן מספר טלפון כדי לברר למי הוא שייך ומאיזה ספק',
+                'whoisPhoneInput_placeholder': 'הזן מספר טלפון לחיפוש (לדוגמה: 0501234567)',
+                'whois-check-btn': 'מי זה?',
                 'loader-text': 'מבצע ניתוח מקיף של מספר מקורות...',
                 'stats-title': 'נתונים וסטטיסטיקה', 
                 'visitors-title': 'מספר מבקרים באתר:', 
                 'top-searches-title': '10 הכתובות הנבדקות ביותר:', 
                 'top-searches-loading': 'טוען נתונים...', 
-                'footer-text': '&copy; 2024 בודק אתרים. כלי חינמי שנוצר כדי לשמור על בטיחותכם ברשת.', 
+                'footer-text': '&copy; 2025 בודק אתרים. כלי חינמי שנוצר כדי לשמור על בטיחותכם ברשת. | גרסה 1.0.1', 
                 'report-title': 'דו"ח ניתוח', 
                 'report-result': 'מקור הבדיקה:', 
                 'report-confidence': 'רמת ביטחון:', 
@@ -152,24 +168,41 @@
                 'checking-google': 'בודק ב-Google Safe Browsing...',
                 'checking-phishtank': 'בודק ב-PhishTank...',
                 'checking-patterns': 'מנתח דפוסים חשודים...',
-                'checking-phone': 'בודק מספר טלפון...'
+                'checking-phone': 'בודק מספר טלפון...',
+                'checking-whois': 'מחפש מידע על המספר...',
+                'whois-result-title': 'מידע על המספר',
+                'whois-carrier': 'ספק:',
+                'whois-country': 'מדינה:',
+                'whois-line-type': 'סוג קו:',
+                'whois-location': 'מיקום:',
+                'whois-valid': 'מספר תקין:',
+                'whois-not-found': 'לא נמצא מידע על מספר זה',
+                'whois-empty': 'אנא הזן מספר טלפון לחיפוש',
+                'line-type-mobile': 'נייד',
+                'line-type-landline': 'קווי',
+                'line-type-voip': 'VoIP (אינטרנט)',
+                'line-type-unknown': 'לא ידוע'
             },
             'en': {
                 'main-title': 'The Safe Website & SMS Checker', 
                 'subtitle': 'Got a suspicious link or message? Check it here.', 
                 'website-tab': 'Website Check', 
                 'sms-tab': 'SMS / Phone Number Check', 
+                'whois-tab': 'Who Is This? (Phone Lookup)',
                 'urlInput_placeholder': 'Paste the website address here', 
                 'url-check-btn': 'Check', 
                 'phoneInput_placeholder': 'Enter phone number to check', 
                 'smsInput_placeholder': 'Paste the SMS message content here (optional)', 
                 'sms-check-btn': 'Check Message / Phone', 
+                'whois-description': 'Enter a phone number to find out who it belongs to and which carrier',
+                'whoisPhoneInput_placeholder': 'Enter phone number to lookup (e.g., +972501234567)',
+                'whois-check-btn': 'Who Is This?',
                 'loader-text': 'Performing comprehensive multi-source analysis...', 
                 'stats-title': 'Data & Statistics', 
                 'visitors-title': 'Website Visitors:', 
                 'top-searches-title': 'Top 10 Checked URLs:', 
                 'top-searches-loading': 'Loading data...', 
-                'footer-text': '&copy; 2024 Website Checker. A free tool to keep you safe online.', 
+                'footer-text': '&copy; 2025 Website Checker. A free tool to keep you safe online. | Version 1.0.1', 
                 'report-title': 'Analysis Report', 
                 'report-result': 'Check Source:', 
                 'report-confidence': 'Confidence Level:', 
@@ -192,7 +225,20 @@
                 'checking-google': 'Checking Google Safe Browsing...',
                 'checking-phishtank': 'Checking PhishTank...',
                 'checking-patterns': 'Analyzing suspicious patterns...',
-                'checking-phone': 'Checking phone number...'
+                'checking-phone': 'Checking phone number...',
+                'checking-whois': 'Looking up phone information...',
+                'whois-result-title': 'Phone Number Information',
+                'whois-carrier': 'Carrier:',
+                'whois-country': 'Country:',
+                'whois-line-type': 'Line Type:',
+                'whois-location': 'Location:',
+                'whois-valid': 'Valid Number:',
+                'whois-not-found': 'No information found for this number',
+                'whois-empty': 'Please enter a phone number to lookup',
+                'line-type-mobile': 'Mobile',
+                'line-type-landline': 'Landline',
+                'line-type-voip': 'VoIP (Internet)',
+                'line-type-unknown': 'Unknown'
             }
         };
 
@@ -398,6 +444,244 @@
             }
             
             return results;
+        }
+
+        // ===================================================================
+        // PHONE NUMBER "WHO IS THIS" LOOKUP
+        // ===================================================================
+        
+        // Israeli carrier prefixes database
+        const israeliCarrierPrefixes = {
+            '050': 'Pelephone',
+            '051': 'Ituran Cellular / GolanTelecom',
+            '052': 'Cellcom',
+            '053': 'Hot Mobile',
+            '054': 'Partner (Orange)',
+            '055': 'Rami Levy / YouPhone',
+            '056': 'Partner (Orange)',
+            '058': 'Golan Telecom',
+            '072': 'VoIP Provider',
+            '073': 'VoIP Provider',
+            '074': 'VoIP Provider',
+            '076': 'VoIP Provider',
+            '077': 'VoIP Provider',
+            '078': 'VoIP Provider',
+            '079': 'VoIP Provider',
+            '02': 'Jerusalem Area (Landline)',
+            '03': 'Tel Aviv Area (Landline)',
+            '04': 'Haifa/North Area (Landline)',
+            '08': 'South Area (Landline)',
+            '09': 'Sharon Area (Landline)',
+            '1700': 'Toll-Free',
+            '1800': 'Toll-Free',
+            '1801': 'Toll-Free',
+            '*': 'Short Code'
+        };
+
+        // International country codes database
+        const countryCodeDatabase = {
+            '1': { country: 'USA/Canada', flag: '🇺🇸' },
+            '44': { country: 'United Kingdom', flag: '🇬🇧' },
+            '972': { country: 'Israel', flag: '🇮🇱' },
+            '49': { country: 'Germany', flag: '🇩🇪' },
+            '33': { country: 'France', flag: '🇫🇷' },
+            '39': { country: 'Italy', flag: '🇮🇹' },
+            '34': { country: 'Spain', flag: '🇪🇸' },
+            '31': { country: 'Netherlands', flag: '🇳🇱' },
+            '7': { country: 'Russia', flag: '🇷🇺' },
+            '86': { country: 'China', flag: '🇨🇳' },
+            '81': { country: 'Japan', flag: '🇯🇵' },
+            '82': { country: 'South Korea', flag: '🇰🇷' },
+            '91': { country: 'India', flag: '🇮🇳' },
+            '61': { country: 'Australia', flag: '🇦🇺' },
+            '55': { country: 'Brazil', flag: '🇧🇷' },
+            '234': { country: 'Nigeria', flag: '🇳🇬' },
+            '233': { country: 'Ghana', flag: '🇬🇭' },
+            '27': { country: 'South Africa', flag: '🇿🇦' },
+            '971': { country: 'UAE', flag: '🇦🇪' },
+            '966': { country: 'Saudi Arabia', flag: '🇸🇦' }
+        };
+
+        /**
+         * Lookup phone number information using local database
+         * @param {string} phone - Phone number to lookup
+         * @returns {object} - Phone information result
+         */
+        function lookupPhoneLocal(phone) {
+            // Normalize phone number
+            let normalizedPhone = phone.replace(/[\s\-\(\)\.]/g, '');
+            
+            let result = {
+                valid: true,
+                country: null,
+                countryFlag: null,
+                carrier: null,
+                lineType: null,
+                location: null,
+                source: 'Local Database'
+            };
+            
+            // Check if it's an Israeli number
+            if (normalizedPhone.startsWith('+972')) {
+                normalizedPhone = '0' + normalizedPhone.substring(4);
+            } else if (normalizedPhone.startsWith('972')) {
+                normalizedPhone = '0' + normalizedPhone.substring(3);
+            }
+            
+            // Israeli number detection
+            if (normalizedPhone.startsWith('0')) {
+                result.country = currentLang === 'he' ? 'ישראל' : 'Israel';
+                result.countryFlag = '🇮🇱';
+                
+                // Determine carrier by prefix
+                const prefix3 = normalizedPhone.substring(0, 3);
+                const prefix2 = normalizedPhone.substring(0, 2);
+                const prefix4 = normalizedPhone.substring(0, 4);
+                
+                if (israeliCarrierPrefixes[prefix3]) {
+                    result.carrier = israeliCarrierPrefixes[prefix3];
+                    // Determine line type
+                    if (['050', '051', '052', '053', '054', '055', '056', '058'].includes(prefix3)) {
+                        result.lineType = currentLang === 'he' ? langDict['he']['line-type-mobile'] : 'Mobile';
+                    } else if (['072', '073', '074', '076', '077', '078', '079'].includes(prefix3)) {
+                        result.lineType = currentLang === 'he' ? langDict['he']['line-type-voip'] : 'VoIP';
+                    } else if (['02', '03', '04', '08', '09'].includes(prefix2)) {
+                        const landlineInfo = israeliCarrierPrefixes[prefix2];
+                        result.lineType = currentLang === 'he' ? langDict['he']['line-type-landline'] : 'Landline';
+                        // Extract area name from description like "Tel Aviv Area (Landline)"
+                        result.location = landlineInfo.replace(' (Landline)', '');
+                        result.carrier = currentLang === 'he' ? 'בזק' : 'Bezeq (Landline)';
+                    }
+                } else if (israeliCarrierPrefixes[prefix2]) {
+                    const landlineInfo = israeliCarrierPrefixes[prefix2];
+                    result.lineType = currentLang === 'he' ? langDict['he']['line-type-landline'] : 'Landline';
+                    result.location = landlineInfo.replace(' (Landline)', '');
+                    result.carrier = currentLang === 'he' ? 'בזק' : 'Bezeq (Landline)';
+                } else if (israeliCarrierPrefixes[prefix4]) {
+                    result.carrier = israeliCarrierPrefixes[prefix4];
+                    result.lineType = currentLang === 'he' ? 'שירות חינמי' : 'Toll-Free';
+                } else if (normalizedPhone.startsWith('*')) {
+                    result.carrier = currentLang === 'he' ? 'קוד קצר' : 'Short Code';
+                    result.lineType = currentLang === 'he' ? 'שירות' : 'Service';
+                }
+                
+                return result;
+            }
+            
+            // International number detection
+            if (normalizedPhone.startsWith('+')) {
+                normalizedPhone = normalizedPhone.substring(1);
+            }
+            
+            // Try to match country code
+            for (let len = 3; len >= 1; len--) {
+                const code = normalizedPhone.substring(0, len);
+                if (countryCodeDatabase[code]) {
+                    result.country = countryCodeDatabase[code].country;
+                    result.countryFlag = countryCodeDatabase[code].flag;
+                    result.lineType = currentLang === 'he' ? langDict['he']['line-type-unknown'] : 'Unknown';
+                    return result;
+                }
+            }
+            
+            // Unknown number format
+            result.valid = false;
+            result.lineType = currentLang === 'he' ? langDict['he']['line-type-unknown'] : 'Unknown';
+            return result;
+        }
+
+        /**
+         * Display phone lookup results
+         */
+        function displayWhoisResults(result) {
+            const resultsDiv = document.getElementById('results');
+            const reportDiv = document.getElementById('report');
+            
+            if (!result.valid && !result.country) {
+                resultsDiv.className = 'text-center mt-6 p-4 rounded-lg text-xl font-bold bg-yellow-100 text-yellow-700';
+                resultsDiv.innerHTML = `<p>${langDict[currentLang]['whois-not-found']}</p>`;
+                reportDiv.classList.add('hidden');
+                return;
+            }
+            
+            resultsDiv.className = 'text-center mt-6 p-4 rounded-lg text-xl font-bold bg-blue-100 text-blue-700';
+            resultsDiv.innerHTML = `<p>📱 ${langDict[currentLang]['whois-result-title']}</p>`;
+            
+            let infoHtml = `<h3 class="text-xl font-bold mb-4">${langDict[currentLang]['whois-result-title']}</h3>`;
+            infoHtml += `<div class="space-y-3 text-right">`;
+            
+            if (result.country) {
+                infoHtml += `<div class="p-3 bg-white rounded border">
+                    <strong>${langDict[currentLang]['whois-country']}</strong> 
+                    <span class="text-lg">${result.countryFlag || ''} ${result.country}</span>
+                </div>`;
+            }
+            
+            if (result.carrier) {
+                infoHtml += `<div class="p-3 bg-white rounded border">
+                    <strong>${langDict[currentLang]['whois-carrier']}</strong> 
+                    <span class="text-lg">${result.carrier}</span>
+                </div>`;
+            }
+            
+            if (result.lineType) {
+                infoHtml += `<div class="p-3 bg-white rounded border">
+                    <strong>${langDict[currentLang]['whois-line-type']}</strong> 
+                    <span class="text-lg">${result.lineType}</span>
+                </div>`;
+            }
+            
+            if (result.location) {
+                infoHtml += `<div class="p-3 bg-white rounded border">
+                    <strong>${langDict[currentLang]['whois-location']}</strong> 
+                    <span class="text-lg">${result.location}</span>
+                </div>`;
+            }
+            
+            infoHtml += `</div>`;
+            infoHtml += `<div class="mt-4 text-sm text-gray-500">
+                <span class="api-badge local">Local Database</span>
+            </div>`;
+            
+            reportDiv.innerHTML = infoHtml;
+            reportDiv.classList.remove('hidden');
+        }
+
+        /**
+         * Run phone "Who Is This" lookup
+         */
+        async function runWhoisCheck() {
+            clearResults();
+            const loader = document.getElementById('loader');
+            const loaderText = document.getElementById('loader-text');
+            const whoisButton = document.getElementById('whois-check-btn');
+            
+            const phone = document.getElementById('whoisPhoneInput').value.trim();
+            
+            if (!phone) {
+                const resultsDiv = document.getElementById('results');
+                resultsDiv.className = 'text-center mt-6 p-4 rounded-lg text-xl font-bold bg-yellow-100 text-yellow-700';
+                resultsDiv.innerHTML = `<p>${langDict[currentLang]['whois-empty']}</p>`;
+                return;
+            }
+            
+            loader.classList.remove('hidden');
+            whoisButton.disabled = true;
+            loaderText.textContent = langDict[currentLang]['checking-whois'];
+            
+            try {
+                // Perform local lookup
+                const result = lookupPhoneLocal(phone);
+                displayWhoisResults(result);
+            } catch (error) {
+                console.error('Whois lookup error:', error);
+                const resultsDiv = document.getElementById('results');
+                resultsDiv.className = 'text-center mt-6 p-4 rounded-lg text-xl font-bold bg-red-100 text-red-700';
+                resultsDiv.innerHTML = `<p>${langDict[currentLang]['error-message']}</p>`;
+            } finally {
+                loader.classList.add('hidden');
+                whoisButton.disabled = false;
+            }
         }
 
         // ===================================================================
@@ -1026,8 +1310,10 @@
             // Set up event listeners for buttons
             document.getElementById('website-tab').addEventListener('click', function() { openTab('website'); });
             document.getElementById('sms-tab').addEventListener('click', function() { openTab('sms'); });
+            document.getElementById('whois-tab').addEventListener('click', function() { openTab('whois'); });
             document.getElementById('url-check-btn').addEventListener('click', function() { runCheck('url'); });
             document.getElementById('sms-check-btn').addEventListener('click', function() { runCheck('sms'); });
+            document.getElementById('whois-check-btn').addEventListener('click', function() { runWhoisCheck(); });
             document.getElementById('lang-he-btn').addEventListener('click', function() { setLanguage('he'); });
             document.getElementById('lang-en-btn').addEventListener('click', function() { setLanguage('en'); });
             
